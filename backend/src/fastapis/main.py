@@ -3,6 +3,7 @@
 from fastapi import FastAPI, HTTPException , Request , status
 from fastapi.middleware.cors import CORSMiddleware
 import time
+from .schema import CreateProductModel, ProductModelResponse
 app = FastAPI()
 app.add_middleware(
   CORSMiddleware,
@@ -121,15 +122,33 @@ def home():
     return { "message": "Welcome from FastAPI! ", "status" : "200"}
 
 
-@app.get("/products")
+@app.get("/products", response_model= list[ProductModelResponse])
 def get_products():
     return products
   
 
-@app.get("/product/details/{product_id}")
+@app.get("/product/details/{product_id}", response_model= ProductModelResponse)
 def get_product_by_id(product_id: int):
     time.sleep(1)
     for product in products:
         if product.get("id") == product_id:
              return product
-    raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Product not found") 
+    raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Product not found")
+
+
+@app.post("/product/create", response_model= ProductModelResponse , status_code= status.HTTP_201_CREATED)
+def create_product(product: CreateProductModel):
+    new_id = len(products) + 1
+    new_product = {
+      "id": new_id,
+      "name": product.name,
+      "price": product.price,
+      "category": product.category,
+      "in_stock": product.in_stock,
+      "quantity": product.quantity,
+      "image": product.image,
+      "rating": product.rating
+    }
+    products.append(new_product)
+    return new_product
+           
