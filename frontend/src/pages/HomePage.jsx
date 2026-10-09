@@ -5,7 +5,8 @@ import { Link } from 'react-router';
 const HomePage = () => {
 
     const [products , setProducts] = useState([]);
-    const [laoding , setLoading] = useState(false);
+    const [loading , setLoading] = useState(false);
+    const [categories , setCategories] = useState([]);
 
    async function fetchProducts(){
     try {
@@ -31,19 +32,44 @@ const HomePage = () => {
 console.log(products);
 
 
+// fetch categoires 
+
+async function fetchCategoires(){
+  try{
+     setLoading(true);
+     const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/categories`,
+    { method:"GET",
+      headers:{
+      "Content-Type": "application/json"
+      }
+     });
+
+     if (response.ok){
+      const data = await response.json();
+      setCategories(data);
+     }
+  }catch(e){
+     console.log('Error fetching categories:', e);
+  } finally{
+    setLoading(false);
+  }
+}
+
+
   // Sample data for categories
-  const categories = [
-    { id: 1, name: 'Electronics', icon: '💻', count: '120+ Items' },
-    { id: 2, name: 'Fashion & Apparel', icon: '🧥', count: '340+ Items' },
-    { id: 3, name: 'Home & Living', icon: '🛋️', count: '95+ Items' },
-    { id: 4, name: 'Fitness & Sports', icon: '⚽', count: '75+ Items' },
-  ];
+  // const categories = [
+  //   { id: 1, name: 'Electronics', icon: '💻', count: '120+ Items' },
+  //   { id: 2, name: 'Fashion & Apparel', icon: '🧥', count: '340+ Items' },
+  //   { id: 3, name: 'Home & Living', icon: '🛋️', count: '95+ Items' },
+  //   { id: 4, name: 'Fitness & Sports', icon: '⚽', count: '75+ Items' },
+  // ];
 
 
 
 
   useEffect(()=>{
     fetchProducts();
+    fetchCategoires();
   }, [])
 
   return (
@@ -110,10 +136,9 @@ console.log(products);
         </div>
         <div className="categories-grid">
           {categories.map((cat) => (
-            <div key={cat.id} className="category-card">
+            <div key={cat.category_id} className="category-card">
               <span className="category-icon">{cat.icon}</span>
-              <h3>{cat.name}</h3>
-              <p>{cat.count}</p>
+              <h3>{cat.category_name}</h3>
             </div>
           ))}
         </div>

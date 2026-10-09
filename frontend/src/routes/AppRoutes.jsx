@@ -3,6 +3,7 @@ import HomePage from "../pages/HomePage.jsx";
 import Header from "../components/Header.jsx"
 import Footer from "../components/Footer.jsx"
 import ProductDetail from "../pages/ProductDetails.jsx";
+import Register from "../pages/RegisterPage.jsx";
 
 
 export default function AppRouter(){
@@ -13,6 +14,8 @@ return (
     <Header/>
      <Routes>
         <Route path="/" element={<HomePage/>} />
+        <Route path="/register" element={<Register/>} />
+
         <Route path="/product/details/:id" element={<ProductDetail/>} />
 
 

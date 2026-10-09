@@ -1,10 +1,24 @@
 
 
-from fastapi import FastAPI, HTTPException , Request , status
+from fastapi import FastAPI, HTTPException , Request , status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import time
-from .schema import CreateProductModel, ProductModelResponse
+from .schema import CreateProductModel, ProductModelResponse, UserResponseModel, UserCreateModel
+from typing import Annotated
+from sqlalchemy import select
+from sqlalchemy.orm import session
+from .modals import User, Category, Product
+from .database import Base , engine , get_db
+from fastapi.staticfiles import StaticFiles
+from passlib.context import CryptContext
+
+
+
+Base.metadata.create_all(bind=engine)
 app = FastAPI()
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/media", StaticFiles(directory="media"), name="media")
 app.add_middleware(
   CORSMiddleware,
   allow_origins=["http://localhost:5173"],
@@ -13,6 +27,17 @@ app.add_middleware(
   allow_headers=["*"]
 )
 
+
+# ****************************** Utils Function *****************************************************
+def get_password_hash(password:str)->str:
+  hashed_passwrd :str= pwd_context.hash(password)
+  return hashed_passwrd
+
+
+
+# ***************************************************************************************************************
+
+categories = [ {"category_name": 'Electronics' , "category_id": 1 , "icon":"💻"}, {"category_name": 'Accessories', "category_id": 2, "icon":"📱"}, {"category_name": 'Audio', "category_id": 3, "icon":"🎵"}, {"category_name": 'Storage', "category_id": 4, "icon":"💾"}, {"category_name": 'Wearables', "category_id": 5, "icon":"⌚"} ]
 products : list(dict) = [
   {
     "id": 1,
@@ -122,6 +147,10 @@ def home():
     return { "message": "Welcome from FastAPI! ", "status" : "200"}
 
 
+
+
+
+#********************************** Product Routes ********************************************
 @app.get("/products", response_model= list[ProductModelResponse])
 def get_products():
     return products
@@ -137,18 +166,81 @@ def get_product_by_id(product_id: int):
 
 
 @app.post("/product/create", response_model= ProductModelResponse , status_code= status.HTTP_201_CREATED)
-def create_product(product: CreateProductModel):
-    new_id = len(products) + 1
-    new_product = {
-      "id": new_id,
-      "name": product.name,
-      "price": product.price,
-      "category": product.category,
-      "in_stock": product.in_stock,
-      "quantity": product.quantity,
-      "image": product.image,
-      "rating": product.rating
-    }
-    products.append(new_product)
+def create_product(product: CreateProductModel, db:Annotated[session,Depends(get_db)]):
+  
+    new_product = Product (
+    
+       product_title= product.name,
+      product_price= product.price,
+      product_category= product.category,
+      product_in_stock= product.in_stock,
+      product_quantity= product.quantity,
+      product_image= product.image,
+      product_rating= product.rating,
+    )
+    db.add(new_product)
+    db.commit()
     return new_product
-           
+
+
+
+
+#****************************************** Categories Routes ********************************************
+@app.get("/categories")
+def get_categoires():
+    return categories           
+  
+#******************************************** User Routes *************************************************
+@app.post("/create/user", status_code=status.HTTP_201_CREATED, response_model=UserResponseModel)
+def create_user(user: UserCreateModel, db: Annotated[session, Depends(get_db)]):
+  results= db.execute(select(User).where(User.userName == user.userName))
+  existing_user = results.scalars().first()
+  if existing_user:
+    raise HTTPException(
+      status_code= status.HTTP_400_BAD_REQUEST,
+      detail="User already exist",
+    )
+    
+  
+  result = db.execute(select(User).where(User.email == user.email))
+  existing_email = result.scalars().first()
+  if existing_email:
+    raise HTTPException(
+      status_code=status.HTTP_400_BAD_REQUEST,
+      detail="Email already exist",
+    )
+  plain_password = user.password
+  hashed_password = get_password_hash(plain_password)
+  new_user = User(
+             userName=user.userName,
+             email = user.email,
+             firstName= user.firstName,
+             lastName=user.lastName,
+             password= hashed_password
+             )
+  db.add(new_user)
+  db.commit()
+  db.refresh
+  
+  
+  return new_user
+
+
+
+
+@app.get("/user/{user_id}", response_model=UserResponseModel)
+def getUserById(user_id:int , db: Annotated[session, Depends(get_db)])-> User:
+  result = db.execute(select(User).where(User.id == user_id))
+  existing_user = result.scalars().first()
+  
+  if existing_user:
+    return existing_user
+  
+  raise HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND , detail="User not found"
+  )
+  
+  
+  
+  
+  
