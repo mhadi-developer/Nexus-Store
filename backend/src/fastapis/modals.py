@@ -30,7 +30,7 @@ class Product(Base):
     product_in_stock:Mapped[bool]=mapped_column(Boolean, nullable=False)
     product_rating:Mapped[float]=mapped_column(Float, nullable=True , default=0)
     product_category:Mapped[str]=mapped_column(String, nullable=False)
-    product_category_id:Mapped[int]=mapped_column(ForeignKey("categoires.category_id"))
+    product_category_id:Mapped[int]=mapped_column(ForeignKey("categoires.category_id"), nullable=False)
     product_img:Mapped[str]=mapped_column(String, nullable=False)
     category: Mapped["Category"] = relationship(
         back_populates="products"
@@ -43,10 +43,12 @@ class Category(Base):
     __tablename__="categoires"
     category_name:Mapped[str]=mapped_column(String(50), nullable=False)
     category_id:Mapped[int]=mapped_column(Integer, primary_key=True , index=True)
-    category_icon: Mapped[str]=mapped_column(String(150), nullable=False)
+    category_image: Mapped[str]=mapped_column(String(500), nullable=False)
     
     products:Mapped[list[Product]]=relationship(
         back_populates="category"
     )
+    
+    
     
     
