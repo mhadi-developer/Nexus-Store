@@ -3,6 +3,19 @@ import '../css/product-details-page.css';
 import {useParams} from "react-router"; 
 import Loader from '../components/Loader';
 
+const normalizeProduct = (product) => ({
+  ...product,
+  id: product.product_id ?? product.id,
+  name: product.product_title ?? product.name,
+  image: product.product_img ?? product.image,
+  price: product.product_price ?? product.price,
+  rating: product.product_rating ?? product.rating,
+  category: product.product_category ?? product.category,
+  category_id: product.product_category_id ?? product.category_id,
+  in_stock: product.product_in_stock ?? product.in_stock,
+  quantity: product.product_quantity ?? product.quantity,
+});
+
 const ProductDetail = () => {
  const {id} = useParams();
  const [product , setProduct] = useState(null);
@@ -19,7 +32,7 @@ const ProductDetail = () => {
       });
       const data = await response.json();
       if(data){
-        setProduct(data);
+        setProduct(normalizeProduct(data));
         setLoading(false);
       }
     }catch(e){

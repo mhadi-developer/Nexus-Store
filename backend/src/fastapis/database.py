@@ -1,17 +1,18 @@
-from sqlalchemy import create_engine
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
 from typing import Generator
-SQLALCHEMY_DATABASE_URL = "sqlite:///./nexus.db"
-engine = create_engine(
+SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./nexus.db"
+engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False}
 )
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession , expire_on_commit=False)
 
 class Base(DeclarativeBase):
     pass
-def get_db() -> Generator[Session, None, None]:
-    db = SessionLocal()
+async def get_db():
+    db =  AsyncSessionLocal()
     try:
         yield db
     finally:

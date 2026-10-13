@@ -25,15 +25,15 @@ class UserResponseModel(UserBase):
 
 
 class ProductModel(BaseModel):
-    id : int
-    name: str = Field(min_length=1, max_length=100)
-    image: str
-    price: float
-    rating: float
-    category: str
-    category_id: int
-    in_stock: bool
-    quantity: int
+    product_id: int
+    product_price: float
+    product_in_stock: bool
+    product_category: str
+    product_img: str
+    product_title: str = Field(min_length=1, max_length=250)
+    product_quantity: int
+    product_rating: float
+    product_category_id: int
 
 
 class CreateProductModel(BaseModel):

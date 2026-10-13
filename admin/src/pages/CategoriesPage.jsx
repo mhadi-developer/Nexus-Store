@@ -5,6 +5,7 @@ import Footer from "../components/Footer.jsx";
 import { useToast } from "../components/ToastProvider.jsx";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
+const getProductCategory = (product) => product.product_category ?? product.category;
 
 async function readApiResponse(response, fallbackMessage) {
   const data = response.status === 204 ? null : await response.json().catch(() => null);
@@ -97,7 +98,7 @@ export default function CategoriesPage() {
   }, []);
 
   const filtered = useMemo(() => categories.filter((category) => category.category_name.toLowerCase().includes(query.toLowerCase())), [categories, query]);
-  const productCount = (categoryName) => products.filter((product) => product.category === categoryName).length;
+  const productCount = (categoryName) => products.filter((product) => getProductCategory(product) === categoryName).length;
 
   async function saveCategory(values) {
     setSaving(true);
@@ -156,7 +157,7 @@ export default function CategoriesPage() {
       <div className="products-stats">
         <section className="nx-glass product-stat"><span className="product-stat-icon purple"><FolderTree size={19} /></span><div><span>Total categories</span><strong>{categories.length}</strong></div></section>
         <section className="nx-glass product-stat"><span className="product-stat-icon teal"><Package size={19} /></span><div><span>Products organized</span><strong>{products.length}</strong></div></section>
-        <section className="nx-glass product-stat"><span className="product-stat-icon amber">!</span><div><span>Uncategorized products</span><strong>{products.filter((product) => !categories.some((category) => category.category_name === product.category)).length}</strong></div></section>
+          <section className="nx-glass product-stat"><span className="product-stat-icon amber">!</span><div><span>Uncategorized products</span><strong>{products.filter((product) => !categories.some((category) => category.category_name === getProductCategory(product))).length}</strong></div></section>
       </div>
 
       <section className="nx-glass products-panel">

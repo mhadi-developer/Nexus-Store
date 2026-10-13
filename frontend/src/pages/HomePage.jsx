@@ -2,6 +2,19 @@ import {useEffect , useState} from 'react';
 import '../css/homepage.css';
 import { Link } from 'react-router';
 
+const normalizeProduct = (product) => ({
+  ...product,
+  product_id: product.product_id ?? product.id,
+  product_title: product.product_title ?? product.name,
+  product_img: product.product_img ?? product.image,
+  product_price: product.product_price ?? product.price,
+  product_rating: product.product_rating ?? product.rating,
+  product_category: product.product_category ?? product.category,
+  product_quantity: product.product_quantity ?? product.quantity,
+  product_in_stock: product.product_in_stock ?? product.in_stock,
+  product_category_id: product.product_category_id ?? product.category_id,
+});
+
 const HomePage = () => {
 
     const [products , setProducts] = useState([]);
@@ -20,7 +33,7 @@ const HomePage = () => {
 
         const data = await response.json();
         if(data){
-            setProducts(data);
+            setProducts(data.map(normalizeProduct));
             setLoading(false);
         }
         
@@ -137,7 +150,9 @@ async function fetchCategoires(){
         <div className="categories-grid">
           {categories.map((cat) => (
             <div key={cat.category_id} className="category-card">
-              <span className="category-icon">{cat.icon}</span>
+              <span className="category-icon">
+                <img src={cat.category_image} alt="" />
+                </span>
               <h3>{cat.category_name}</h3>
             </div>
           ))}
@@ -155,27 +170,27 @@ async function fetchCategoires(){
         </div>
        <div className="products-grid">
   {products.map((product) => (
-    <div key={product.id} className="product-card">
+    <div key={product.product_id} className="product-card">
       <div className="product-image-container">
-        <span className={`product-badge ${product.category.toLowerCase().replace(' ', '-')}`}>
-          {product.category}
+        <span className={`product-badge ${product.product_category.toLowerCase().replace(' ', '-')}`}>
+          {product.product_category}
         </span>
-        <img src={product?.image} alt={product.name} className="product-image" />
+        <img src={product?.product_img} alt={product.product_title} className="product-image" />
         <button className="quick-add-btn" aria-label="Add to cart">+ Quick Add</button>
       </div>
       <div className="product-details">
         <div className="product-rating">
-          ⭐ {product.quantity}
+          ⭐ {product.product_rating}
         </div>
-        <h3 className="product-title">{product.name}</h3>
+        <h3 className="product-title">{product.product_title}</h3>
         <div className="product-pricing">
-          <span className="current-price">${product.price}</span>
-          {product.price && (
-            <span className="original-price">${product.price}</span>
+          <span className="current-price">${product.product_price}</span>
+          {product.product_price && (
+            <span className="original-price">${product.product_price}</span>
           )}
         </div>
         {/* View Details Link / Button */}
-        <Link to={`/product/details/${product.id}`} className="view-details-link">
+        <Link to={`/product/details/${product.product_id}`} className="view-details-link">
           View Details
         </Link>
       </div>

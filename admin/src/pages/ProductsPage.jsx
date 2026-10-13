@@ -6,6 +6,18 @@ import { useToast } from "../components/ToastProvider.jsx";
 
 const money = (amount) => `$${Number(amount).toFixed(2)}`;
 const API_URL = import.meta.env.VITE_BACKEND_URL;
+const normalizeProduct = (product) => ({
+  ...product,
+  id: product.product_id ?? product.id,
+  name: product.product_title ?? product.name,
+  image: product.product_img ?? product.image,
+  price: product.product_price ?? product.price,
+  rating: product.product_rating ?? product.rating,
+  category: product.product_category ?? product.category,
+  category_id: product.product_category_id ?? product.category_id,
+  in_stock: product.product_in_stock ?? product.in_stock,
+  quantity: product.product_quantity ?? product.quantity,
+});
 
 async function addProductApi(product) {
   const response = await fetch(`${API_URL}/create/product`, {
@@ -116,7 +128,7 @@ async  function getProducts(){
       if(response.ok){
            const data = await response.json();
 
-     setProducts(data);
+     setProducts(data.map(normalizeProduct));
       setLoading(false);
       }
      
@@ -134,7 +146,7 @@ async  function getProducts(){
     try {
 
       const createdProduct = await addProductApi(payload);
-      setProducts((items) => [...items, createdProduct]);
+      setProducts((items) => [...items, normalizeProduct(createdProduct)]);
       toast("New product added successfully", "success");
       setModal(null);
     } catch (error) {
@@ -150,7 +162,7 @@ async  function getProducts(){
     const payload = { ...form, category_id: Number(form.category_id), price: Number(form.price), quantity: Number(form.quantity), rating: Number(form.rating) || 0, in_stock: Number(form.quantity) > 0 };
     try {
       const updatedProduct = await updateProductApi(productId, payload);
-      setProducts((items) => items.map((item) => item.id === productId ? updatedProduct : item));
+      setProducts((items) => items.map((item) => item.id === productId ? normalizeProduct(updatedProduct) : item));
       toast("Product changes saved", "success");
       setModal(null);
     } catch (error) {
