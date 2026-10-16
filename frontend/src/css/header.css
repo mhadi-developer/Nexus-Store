@@ -203,6 +203,165 @@
     inset -2px -2px 3px rgba(160, 20, 50, 0.3);
 }
 
+/* Signed-in user profile */
+.profile-area {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-trigger,
+.profile-signin {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 5px 12px 5px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  background: linear-gradient(145deg, #fbfaff, #eeebff);
+  color: var(--primary-color, #2f2b63);
+  text-decoration: none;
+  box-shadow:
+    5px 6px 14px rgba(124, 112, 196, 0.22),
+    -4px -4px 10px rgba(255, 255, 255, 0.95),
+    inset -2px -2px 5px rgba(124, 112, 196, 0.08),
+    inset 2px 2px 5px rgba(255, 255, 255, 0.9);
+  transition: var(--transition, all 0.25s ease);
+}
+
+.profile-trigger {
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.profile-trigger:hover,
+.profile-signin:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    7px 9px 18px rgba(124, 112, 196, 0.27),
+    -4px -4px 10px rgba(255, 255, 255, 1),
+    inset -2px -2px 5px rgba(124, 112, 196, 0.08),
+    inset 2px 2px 5px rgba(255, 255, 255, 0.95);
+}
+
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #9b8dff, #6552ee);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 900;
+  box-shadow: 3px 4px 9px rgba(91, 72, 240, 0.3);
+}
+
+.profile-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-width: 145px;
+  line-height: 1.2;
+}
+
+.profile-copy strong {
+  overflow: hidden;
+  color: var(--primary-color, #2f2b63);
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-copy small {
+  overflow: hidden;
+  color: var(--text-muted, #8481ae);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-chevron {
+  flex-shrink: 0;
+  color: #8b83b7;
+  transition: transform 0.2s ease;
+}
+
+.profile-chevron.is-open { transform: rotate(180deg); }
+
+.profile-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 1100;
+  width: min(280px, calc(100vw - 28px));
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  background: rgba(250, 249, 255, 0.97);
+  box-shadow: 10px 14px 30px rgba(78, 67, 139, 0.22), -4px -4px 12px rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  animation: profile-menu-in 160ms ease-out;
+}
+
+.profile-menu-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 11px 12px 13px;
+  border-bottom: 1px solid rgba(124, 112, 196, 0.15);
+}
+
+.profile-menu-details strong {
+  color: var(--primary-color, #2f2b63);
+  font-size: 0.88rem;
+}
+
+.profile-menu-details span {
+  overflow: hidden;
+  color: var(--text-muted, #8481ae);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+}
+
+.profile-menu-signout {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  margin-top: 7px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  color: #b42349;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.profile-menu-signout:hover { background: #fff0f3; }
+
+.profile-trigger:focus-visible,
+.profile-signin:focus-visible,
+.profile-menu-signout:focus-visible {
+  outline: 3px solid rgba(111, 92, 255, 0.5);
+  outline-offset: 3px;
+}
+
+@keyframes profile-menu-in {
+  from { opacity: 0; transform: translateY(-5px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* Header Responsive Design */
 @media (max-width: 1024px) {
   .mobile-menu-toggle {
@@ -229,6 +388,15 @@
   .search-bar {
     display: none;
   }
+}
+
+@media (max-width: 640px) {
+  .main-nav-container { gap: 0.75rem; padding-inline: 5%; }
+  .nav-right { gap: 0.55rem; }
+  .profile-trigger,
+  .profile-signin { gap: 0; padding-right: 7px; }
+  .profile-copy,
+  .profile-chevron { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

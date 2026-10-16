@@ -20,9 +20,6 @@ class UserCreateModel(UserBase):
 class UserResponseModel(UserBase):
     model_config= ConfigDict(from_attributes=True)
     id:int
-    profileImage: str|None
-    profileImageUrl: str
-
 
 class ProductModel(BaseModel):
     product_id: int
@@ -82,3 +79,7 @@ class CategoryResponseModel(CategoryBase):
     category_id: int
     
     
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str

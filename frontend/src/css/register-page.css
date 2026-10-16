@@ -605,6 +605,28 @@
   overflow-wrap: anywhere;
 }
 
+.form-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  margin-bottom: 18px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 800;
+  box-shadow: var(--clay-card);
+  animation: toast-in 220ms ease-out;
+}
+
+.form-toast svg { flex-shrink: 0; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-form { margin-top: 8px; }
+
 .form-alert svg {
   flex-shrink: 0;
   margin-top: 2px;

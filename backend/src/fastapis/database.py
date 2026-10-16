@@ -12,8 +12,10 @@ AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession , expire_on_c
 class Base(DeclarativeBase):
     pass
 async def get_db():
-    db =  AsyncSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise

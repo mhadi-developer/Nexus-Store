@@ -15,17 +15,18 @@ import {
   CheckCircle2,
   CircleAlert,
 } from "lucide-react";
+import { Link } from "react-router";
 
 import { z } from "zod";
 
 const registerSchema = z
   .object({
-    firstName: z.string().trim().min(1, "First name is required"),
-    lastName: z.string().trim().min(1, "Last name is required"),
+    firstName: z.string().trim().min(5, "First name must be at least 5 characters"),
+    lastName: z.string().trim().min(3, "Last name must be at least 3 characters"),
     userName: z
       .string()
       .trim()
-      .min(3, "Username must be at least 3 characters"),
+      .min(5, "Username must be at least 5 characters"),
     email: z.string().trim().email("Enter a valid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
@@ -42,12 +43,12 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [registered, setRegistered] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
 const {
   register,
   handleSubmit,
-  watch,
-  setValue,
+  reset,
   formState: { errors, isSubmitting },
 } = useForm({
   resolver: zodResolver(registerSchema),
@@ -63,7 +64,6 @@ const {
 });
 const onSubmit = async (values) => {
   setSubmitError("");
-  setRegistered(false);
 
   const payload = {
     firstName: values.firstName.trim(),
@@ -72,8 +72,6 @@ const onSubmit = async (values) => {
     email: values.email.trim(),
     password: values.password,
   };
-
-  console.log('payload:',payload)
 
   try {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -96,7 +94,7 @@ const onSubmit = async (values) => {
 
     const result = await response.json().catch(() => null);
 
-    if (!response.ok) {
+    if (response.status !== 200 && response.status !== 201) {
       const message =
         result?.detail ||
         result?.message ||
@@ -109,8 +107,14 @@ const onSubmit = async (values) => {
       );
     }
 
+    setSuccessMessage(
+      typeof result?.message === "string"
+        ? result.message
+        : `Account created successfully${result?.userName ? ` for ${result.userName}` : ""}.`
+    );
     setRegistered(true);
-    console.log("Registration successful:", result);
+    reset();
+    window.setTimeout(() => setRegistered(false), 4500);
   } catch (error) {
     console.error("Registration error:", error);
 
@@ -197,12 +201,9 @@ const onSubmit = async (values) => {
             </div>
 
             {registered && (
-              <div className="form-alert success-alert" role="status">
+              <div className="form-toast success-alert" role="status">
                 <CheckCircle2 size={19} />
-                <span>
-                  Form validated successfully. Connect your API
-                  to create the account.
-                </span>
+                <span>{successMessage}</span>
               </div>
             )}
 
@@ -410,8 +411,8 @@ const onSubmit = async (values) => {
 
                   <span>
                     I agree to the{" "}
-                    <a href="/terms">Terms of Service</a>{" "}
-                    and <a href="/privacy">Privacy Policy</a>.
+              <a href="/terms">Terms of Service</a>{" "}
+                  and <a href="/privacy">Privacy Policy</a>.
                   </span>
                 </label>
 
@@ -438,7 +439,7 @@ const onSubmit = async (values) => {
 
             <p className="login-prompt">
               Welcome back!{" "}
-              <a href="/login">Sign in instead</a>
+              <Link to="/login">Sign in instead</Link>
             </p>
 
             <div className="form-security-note">

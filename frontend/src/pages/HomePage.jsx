@@ -33,7 +33,7 @@ const HomePage = () => {
 
         const data = await response.json();
         if(data){
-            setProducts(data.map(normalizeProduct));
+            setProducts(data?.map(normalizeProduct));
             setLoading(false);
         }
         
