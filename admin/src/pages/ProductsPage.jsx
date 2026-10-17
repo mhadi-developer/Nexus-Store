@@ -93,6 +93,7 @@ function EditProductModal({ product, onClose, onUpdate, saving, error, categorie
     </form>
   </ProductModalShell>;
 }
+ const trucateTitle = (title , max=20)=> title?.length < max ? title: title.slice(0,max)+ "..."
 
 export default function ProductsPage() {
   const toast = useToast();
@@ -188,6 +189,8 @@ async  function getProducts(){
     }).catch((error) => setActionError(error.message)).finally(() => setCategoriesLoading(false));
   },[])
 
+
+ 
   return (
     <div className="nx-shell">
       <Header active="/admin/products" notifications={3} initials="NX" />
@@ -214,11 +217,11 @@ async  function getProducts(){
           <div className="nx-table-wrap">
             <table className="nx-table products-table">
               <thead><tr><th>Image</th><th>Product</th><th>Quantity</th><th>Category</th><th>Price</th><th>Rating</th><th>Availability</th><th><span className="sr-only">Actions</span></th></tr></thead>
-              <tbody>{filtered.map((product) => <tr key={product.id}>
-                <td><span className="product-thumb" style={{ "--product-color": "#19d3c5" }}>{product.image ? <img src={product.image} alt={`${product.name}`} /> : <ImagePlus size={16} aria-hidden="true" />}</span></td>
-                <td><strong>{product.name}</strong></td>
-                <td className="product-quantity">{product.quantity}</td><td>{product.category}</td><td className="product-price">{money(product.price)}</td><td>{Number(product.rating || 0).toFixed(1)} <span className="product-rating-star">&#9733;</span></td><td><span className={`product-status ${product.in_stock ? "active" : "out-of-stock"}`}><i />{product.in_stock ? "In stock" : "Out of stock"}</span></td>
-                <td><div className="product-actions"><button type="button" onClick={() => { setActionError(""); setModal({ type: "edit", product }); }} aria-label={`Edit ${product?.name}`} title="Edit product"><Pencil size={15} /></button><button type="button" className="delete" onClick={() => deleteProduct(product)} aria-label={`Delete ${product.name}`} title="Delete product"><Trash2 size={15} /></button></div></td>
+              <tbody>{filtered.map((product) => <tr key={product?.id}>
+                <td><span className="product-thumb" style={{ "--product-color": "#19d3c5" }}>{product?.image ? <img src={product?.image} alt={`${product?.name}`} /> : <ImagePlus size={16} aria-hidden="true" />}</span></td>
+                <td><strong>{trucateTitle(product?.name)}</strong></td>
+                <td className="product-quantity">{product?.quantity}</td><td>{product?.category}</td><td className="product-price">{money(product?.price)}</td><td>{Number(product?.rating || 0).toFixed(1)} <span className="product-rating-star">&#9733;</span></td><td><span className={`product-status ${product?.in_stock ? "active" : "out-of-stock"}`}><i />{product?.in_stock ? "In stock" : "Out of stock"}</span></td>
+                <td><div className="product-actions"><button type="button" onClick={() => { setActionError(""); setModal({ type: "edit", product }); }} aria-label={`Edit ${product?.name}`} title="Edit product"><Pencil size={15} /></button><button type="button" className="delete" onClick={() => deleteProduct(product)} aria-label={`Delete ${product?.name}`} title="Delete product"><Trash2 size={15} /></button></div></td>
               </tr>)}</tbody>
             </table>
             {loading ? <div className="products-empty"><Package size={25} /><strong>Loading products…</strong></div> : filtered.length === 0 && <div className="products-empty"><Package size={25} /><strong>No products found</strong><span>Try another search or filter.</span></div>}

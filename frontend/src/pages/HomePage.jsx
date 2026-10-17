@@ -1,6 +1,11 @@
 import {useEffect , useState} from 'react';
 import '../css/homepage.css';
 import { Link } from 'react-router';
+import InlineLoader from '../components/InlineLoader.jsx';
+
+const ShopNowButton = ({ to }) => <Link to={to} className="btn btn-primary">Shop Now</Link>;
+const ExploreCollectionButton = ({ to }) => <Link to={to} className="btn btn-outline">Explore Collection</Link>;
+
 
 const normalizeProduct = (product) => ({
   ...product,
@@ -18,38 +23,38 @@ const normalizeProduct = (product) => ({
 const HomePage = () => {
 
     const [products , setProducts] = useState([]);
-    const [loading , setLoading] = useState(false);
+    const [productsLoading, setProductsLoading] = useState(true);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
     const [categories , setCategories] = useState([]);
 
    async function fetchProducts(){
     try {
-        setLoading(true);
-        const response =  await fetch("http://localhost:8000/products",{
+        setProductsLoading(true);
+        const limit = 8;
+        const offset = 0
+
+        const response =  await fetch(`${import.meta.env.VITE_BACKEND_URL}/products?limit=${limit}&offset=${offset}`,{
             method: "GET",
             headers:{
                 "Content-Type":"application/json"
             }
         });
 
+        if (!response.ok) throw new Error('Could not load products');
         const data = await response.json();
-        if(data){
-            setProducts(data?.map(normalizeProduct));
-            setLoading(false);
-        }
+        setProducts(Array.isArray(data) ? data.map(normalizeProduct) : []);
         
     } catch (error) {
         console.log('Erorr------------------->', error);
-        setLoading(false);
+    } finally {
+        setProductsLoading(false);
     }
    }
-console.log(products);
-
-
 // fetch categoires 
 
 async function fetchCategoires(){
   try{
-     setLoading(true);
+     setCategoriesLoading(true);
      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/categories`,
     { method:"GET",
       headers:{
@@ -59,12 +64,12 @@ async function fetchCategoires(){
 
      if (response.ok){
       const data = await response.json();
-      setCategories(data);
+      setCategories(Array.isArray(data) ? data : []);
      }
   }catch(e){
      console.log('Error fetching categories:', e);
   } finally{
-    setLoading(false);
+    setCategoriesLoading(false);
   }
 }
 
@@ -87,6 +92,12 @@ async function fetchCategoires(){
 
   return (
     <div className="homepage">
+      {(categoriesLoading || productsLoading) && (
+        <InlineLoader
+          className="home-loading-indicator"
+          text="Loading categories and products..."
+        />
+      )}
       {/* --- HERO SECTION --- */}
       <section className="hero-section">
         <div className="hero-content">
@@ -96,15 +107,17 @@ async function fetchCategoires(){
             Discover premium quality gear, state-of-the-art electronics, and modern essentials crafted for performance and style.
           </p>
           <div className="hero-actions">
-            <button className="btn btn-primary">Shop Now</button>
-            <button className="btn btn-outline">Explore Collections</button>
+            <ShopNowButton to="/shop" />
+            <ExploreCollectionButton to={"/categories"}/>
           </div>
         </div>
         <div className="hero-image-wrapper">
-          <img 
-            src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=800" 
+          <img
+            src="/e-commerce-hero-img.avif"
             alt="E-commerce Hero Showcase" 
             className="hero-image"
+            fetchPriority="high"
+            decoding="async"
           />
         </div>
       </section>
@@ -145,13 +158,13 @@ async function fetchCategoires(){
       <section className="categories-section">
         <div className="section-header">
           <h2>Shop by Category</h2>
-          <a href="#categories" className="view-all">Browse All →</a>
+          <Link to="/categories" className="view-all">Browse All →</Link>
         </div>
         <div className="categories-grid">
-          {categories.map((cat) => (
+          {categoriesLoading ? <InlineLoader text="Loading categories..." /> : categories.map((cat) => (
             <div key={cat.category_id} className="category-card">
               <span className="category-icon">
-                <img src={cat.category_image} alt="" />
+                <img src={cat.category_image} alt="" loading="lazy" decoding="async" />
                 </span>
               <h3>{cat.category_name}</h3>
             </div>
@@ -160,22 +173,22 @@ async function fetchCategoires(){
       </section>
 
       {/* --- FEATURED PRODUCTS SECTION --- */}
-      <section className="products-section">
+      <section className="products-section" id='feature-products'>
         <div className="section-header">
           <div>
             <h2>Featured Products</h2>
             <p className="section-subtitle">Handpicked items tailored for your modern workspace and lifestyle.</p>
           </div>
-          <a href="#products" className="view-all">View All Products →</a>
+          <Link to="/shop" className="view-all">View All Products →</Link>
         </div>
        <div className="products-grid">
-  {products.map((product) => (
+  {productsLoading ? <InlineLoader text="Loading products..." /> : products.map((product) => (
     <div key={product.product_id} className="product-card">
       <div className="product-image-container">
         <span className={`product-badge ${product.product_category.toLowerCase().replace(' ', '-')}`}>
           {product.product_category}
         </span>
-        <img src={product?.product_img} alt={product.product_title} className="product-image" />
+        <img src={product?.product_img} alt={product.product_title} className="product-image" loading="lazy" decoding="async" />
         <button className="quick-add-btn" aria-label="Add to cart">+ Quick Add</button>
       </div>
       <div className="product-details">

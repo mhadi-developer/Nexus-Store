@@ -7,12 +7,15 @@
 
 .breadcrumb {
   display: inline-block;
+  max-width: 100%;
   font-size: 0.85rem;
   font-weight: 600;
+  line-height: 1.5;
   color: var(--text-muted, #8481ae);
   margin-bottom: 2.5rem;
   padding: 0.55rem 1.25rem;
   border-radius: 999px;
+  overflow-wrap: anywhere;
   background-color: var(--bg-light, #f1efff);
   box-shadow:
     inset 4px 4px 8px rgba(124, 112, 196, 0.22),

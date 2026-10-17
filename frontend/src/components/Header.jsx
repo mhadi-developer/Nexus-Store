@@ -62,10 +62,10 @@ const Header = () => {
             <span className="badge-count">3</span>
           </button>
 
-          <button className="icon-btn cart-btn" aria-label="Shopping Cart">
+          <Link to="/cart" className="icon-btn cart-btn" aria-label="Shopping Cart">
             🛒
             <span className="badge-count">2</span>
-          </button>
+          </Link>
 
           {user ? (
             <div className="profile-area">

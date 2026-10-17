@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Query
 from typing import Annotated
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 import asyncio
 
@@ -10,7 +10,7 @@ from ..database import get_db
 
 router = APIRouter()
 from fastapi import APIRouter, HTTPException, status, Depends
-from typing import Annotated
+from typing import Annotated, Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 import asyncio
@@ -20,16 +20,39 @@ from ..modals import Product, Category
 from ..database import get_db
 
 router = APIRouter(tags=["Products"])
-
 @router.get("/products")
-async def get_products(db: Annotated[AsyncSession, Depends(get_db)]):
-    result = await db.scalars(select(Product))
+async def get_products(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    limit: Optional[int] = Query(None, ge=1, le=100, description="Max records to return"),
+    offset: Optional[int] = Query(None, ge=0, description="Records to skip"),
+    category_name: Optional[str] = Query(None, description="category of the products"),
+    category_id: Optional[int] = Query(None, ge=1, description="ID of the product category"),
+):
+    stmt = select(Product)
+
+    if category_id is not None:
+        stmt = stmt.where(Product.product_category_id == category_id)
+    if category_name is not None:
+        stmt = stmt.where(func.lower(Product.product_category) == category_name.lower())
+
+    if offset is not None:
+        stmt = stmt.offset(offset)
+    if limit is not None:
+        stmt = stmt.limit(limit)
+
+    result = await db.scalars(stmt)
     products = result.all()
+
     return [{
-        "id": p.product_id, "name": p.product_title, "image": p.product_img,
-        "price": p.product_price, "rating": p.product_rating or 0,
-        "category": p.product_category, "category_id": p.product_category_id,
-        "in_stock": p.product_in_stock, "quantity": p.product_quantity
+        "id": p.product_id,
+        "name": p.product_title,
+        "image": p.product_img,
+        "price": p.product_price,
+        "rating": p.product_rating or 0,
+        "category": p.product_category,
+        "category_id": p.product_category_id,
+        "in_stock": p.product_in_stock,
+        "quantity": p.product_quantity
     } for p in products]
 
 @router.get("/product/details/{product_id}")

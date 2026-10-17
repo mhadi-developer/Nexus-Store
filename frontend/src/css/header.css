@@ -399,6 +399,12 @@
   .profile-chevron { display: none; }
 }
 
+@media (max-width: 380px) {
+  .nav-left { gap: 0.45rem; }
+  .logo { font-size: 1.4rem; }
+  .nav-right > .icon-btn:not(.cart-btn) { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;

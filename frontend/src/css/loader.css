@@ -1,4 +1,4 @@
-/* --- LOADER STYLES (CLAYMORPHISM) --- */
+/* Reusable inline and full-page glassmorphism loader. */
 .loader-wrapper {
   display: flex;
   justify-content: center;
@@ -9,13 +9,14 @@
 
 .loader-wrapper.fullscreen {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(233, 230, 255, 0.82);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  inset: 0;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  background: rgba(20, 25, 45, 0.24);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
   z-index: 9999;
   padding: 0;
 }
@@ -26,13 +27,14 @@
   align-items: center;
   gap: 1.25rem;
   padding: 2rem 2.75rem;
-  background-color: var(--white, #f6f4ff);
-  border-radius: var(--radius-md, 26px);
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 24px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   box-shadow:
-    12px 12px 26px rgba(124, 112, 196, 0.3),
-    -9px -9px 20px rgba(255, 255, 255, 0.95),
-    inset -5px -5px 10px rgba(124, 112, 196, 0.12),
-    inset 5px 5px 10px rgba(255, 255, 255, 0.9);
+    0 20px 60px rgba(20, 25, 45, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
 .spinner {
@@ -40,36 +42,19 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background-color: var(--bg-light, #f1efff);
-  /* sunken track */
-  box-shadow:
-    inset 6px 6px 12px rgba(124, 112, 196, 0.28),
-    inset -6px -6px 12px rgba(255, 255, 255, 0.95);
+  border: 6px solid rgba(95, 75, 240, 0.14);
+  border-top-color: #6d5dfc;
+  border-right-color: rgba(109, 93, 252, 0.5);
+  background: transparent;
+  box-shadow: 0 8px 22px rgba(109, 93, 252, 0.16);
   animation: spin 1s linear infinite;
-}
-
-/* puffy accent bead riding the track */
-.spinner::before {
-  content: "";
-  position: absolute;
-  top: -3px;
-  left: 50%;
-  width: 22px;
-  height: 22px;
-  margin-left: -11px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #8f80ff, #5f4bf0);
-  box-shadow:
-    4px 5px 10px rgba(111, 92, 255, 0.45),
-    inset -3px -3px 5px rgba(52, 33, 190, 0.4),
-    inset 3px 3px 5px rgba(255, 255, 255, 0.45);
 }
 
 .loader-text {
   font-family: "Nunito", sans-serif;
   font-size: 0.95rem;
   font-weight: 800;
-  color: var(--text-muted, #8481ae);
+  color: #39365d;
   letter-spacing: 0.5px;
 }
 

@@ -10,7 +10,7 @@ from ..schema import Token, UserResponseModel, UserCreateModel
 from ..modals import User
 from ..database import get_db
 from ..config import settings
-from ..auth import create_access_token  , verify_password , auth_schema , verify_jwt
+from ..auth import create_access_token  , verify_password , auth_schema , verify_jwt, current_user
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
@@ -75,30 +75,15 @@ async def login_for_access_token(
 
 @router.get("/login/user" , response_model=UserResponseModel)
 async def get_login_user(
-    token: Annotated[str, Depends(auth_schema)],
-    db: Annotated[AsyncSession , Depends(get_db)]
-):
-    user_id = verify_jwt(token=token)
-    if user_id is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expire token")
+    login_user:current_user
+)->User:
+    if not login_user:
+       raise HTTPException(
+           status_code=status.HTTP_401_UNAUTHORIZED,
+           detail="Login user not found"
+       )
     
-    try:
-        user_id_int = int(user_id)
-    except (TypeError, ValueError):
-        
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED
-            )
-    result = await db.execute(select(User).where(User.id == user_id_int))
-    user = result.scalars().first()
-    
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND
-        )
-    return user
-    
-    
+    return login_user
 
 
 @router.get("/user/{user_id}", response_model=UserResponseModel)
