@@ -83,3 +83,21 @@ class CategoryResponseModel(CategoryBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+
+class CartItemAdd(BaseModel):
+    product_id: int = Field(gt=0, description="Product ID must be a positive integer")
+    quantity: int = Field(gt=0, description="Quantity must be greater than zero")
+    
+    
+class CartItemUpdate(BaseModel):
+    quantity: int = Field(ge=0, description="Quantity can be zero to remove, or positive")
+
+class CartItemResponse(BaseModel):
+    product_id: int
+    quantity: int
+
+class CartResponse(BaseModel):
+    cart_id: str
+    items: list[CartItemResponse]

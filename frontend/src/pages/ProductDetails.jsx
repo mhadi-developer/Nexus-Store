@@ -1,7 +1,8 @@
-import React, {useState , useEffect} from 'react';
+﻿import React, {useState , useEffect} from 'react';
 import '../css/product-details-page.css';
 import {useParams} from "react-router"; 
 import Loader from '../components/Loader';
+import { useCart } from '../context/CartContext.jsx';
 
 const normalizeProduct = (product) => ({
   ...product,
@@ -20,7 +21,28 @@ const ProductDetail = () => {
  const {id} = useParams();
  const [product , setProduct] = useState(null);
  const [loading , setLoading] = useState(false);
+ const [cartQuantity, setCartQuantity] = useState(1);
+ const { cart, addToCart, incrementQuantity, decrementQuantity } = useCart();
+ const cartItem = product
+   ? cart.find((item) => String(item.id ?? item.product_id) === String(product.id ?? product.product_id))
+   : null;
+ const displayedQuantity = Number(cartItem?.product_cart_quantity) || cartQuantity;
 
+ const decreaseQuantity = () => {
+   if (cartItem) {
+     decrementQuantity(cartItem);
+     return;
+   }
+   setCartQuantity((quantity) => Math.max(1, quantity - 1));
+ };
+
+ const increaseQuantity = () => {
+   if (cartItem) {
+     incrementQuantity(cartItem);
+     return;
+   }
+   setCartQuantity((quantity) => quantity + 1);
+ };
  async function fetchProductDetails(){
     try{
     setLoading(true);
@@ -71,7 +93,7 @@ if (loading) {
           <h1 className="product-name">{product?.name}</h1>
 
           <div className="rating-review-row">
-            <span className="stars">⭐ {product?.rating}</span>
+            <span className="stars">â­ {product?.rating}</span>
             <span className="review-count">(124 Customer Reviews)</span>
           </div>
 
@@ -89,27 +111,32 @@ if (loading) {
           {product?.in_stock ? (
             <div className="purchase-controls">
               <div className="quantity-selector">
-                <button aria-label="Decrease quantity">-</button>
-                <span>1</span>
-                <button aria-label="Increase quantity">+</button>
+                <button type="button" aria-label="Decrease quantity" onClick={decreaseQuantity}>-</button>
+                <span>{displayedQuantity}</span>
+                <button type="button" aria-label="Increase quantity" onClick={increaseQuantity}>+</button>
               </div>
-              <button className="btn btn-primary add-to-cart-btn">
-                Add to Cart • ${product?.price.toFixed(2)}
+              <button
+                type="button"
+                disabled={!!cartItem}
+                className="btn btn-primary add-to-cart-btn"
+                onClick={() => addToCart({ ...product, product_cart_quantity: cartQuantity })}
+              >
+                {cartItem ? 'Already Added In Cart' : `Add to Cart - $${(product.price * cartQuantity).toFixed(2)}`}
               </button>
             </div>
           ) : (
             <div className="sold-out-alert">
-              <p>⚠️ This item is currently out of stock. Check back later or add it to your wishlist.</p>
+              <p>âš ï¸ This item is currently out of stock. Check back later or add it to your wishlist.</p>
               <button className="btn btn-outline">Add to Wishlist</button>
             </div>
           )}
 
           <div className="product-meta-list">
             <div className="meta-item">
-              <span>🚚 Free Shipping:</span> Orders over $50 qualify for expedited delivery.
+              <span>ðŸšš Free Shipping:</span> Orders over $50 qualify for expedited delivery.
             </div>
             <div className="meta-item">
-              <span>🔄 Warranty:</span> 1-Year manufacturer replacement guarantee.
+              <span>ðŸ”„ Warranty:</span> 1-Year manufacturer replacement guarantee.
             </div>
           </div>
         </div>

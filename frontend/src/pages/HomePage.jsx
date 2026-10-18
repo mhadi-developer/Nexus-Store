@@ -2,6 +2,7 @@ import {useEffect , useState} from 'react';
 import '../css/homepage.css';
 import { Link } from 'react-router';
 import InlineLoader from '../components/InlineLoader.jsx';
+import { useCart } from '../context/CartContext.jsx';
 
 const ShopNowButton = ({ to }) => <Link to={to} className="btn btn-primary">Shop Now</Link>;
 const ExploreCollectionButton = ({ to }) => <Link to={to} className="btn btn-outline">Explore Collection</Link>;
@@ -26,7 +27,8 @@ const HomePage = () => {
     const [productsLoading, setProductsLoading] = useState(true);
     const [categoriesLoading, setCategoriesLoading] = useState(true);
     const [categories , setCategories] = useState([]);
-
+    const {cart , addToCart} = useCart()
+  
    async function fetchProducts(){
     try {
         setProductsLoading(true);
@@ -89,6 +91,7 @@ async function fetchCategoires(){
     fetchProducts();
     fetchCategoires();
   }, [])
+
 
   return (
     <div className="homepage">
@@ -189,7 +192,10 @@ async function fetchCategoires(){
           {product.product_category}
         </span>
         <img src={product?.product_img} alt={product.product_title} className="product-image" loading="lazy" decoding="async" />
-        <button className="quick-add-btn" aria-label="Add to cart">+ Quick Add</button>
+
+        {
+         cart.length > 0 && cart.find((item)=> item.product_id == product.product_id) ?  <button className="quick-add-btn"  disabled={true} aria-label="Add to cart" > Already Added</button>:  <button className="quick-add-btn" aria-label="Add to cart" onClick={()=>addToCart(product)}>+ Quick Add</button>
+        }
       </div>
       <div className="product-details">
         <div className="product-rating">

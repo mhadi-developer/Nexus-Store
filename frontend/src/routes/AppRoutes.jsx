@@ -12,6 +12,7 @@ const LoginPage = lazy(() => import("../pages/LoginPage.jsx"));
 const NotFound = lazy(() => import("../pages/NotFound.jsx"));
 const ProtectRoutes = lazy(() => import("../pages/Protected.jsx"));
 const CartPage = lazy(() => import("../pages/CartPage.jsx"));
+const OrderSummaryPage = lazy(() => import("../pages/OrderSummaryPage.jsx"));
 const ShopPage = lazy(() => import("../pages/ShopPage.jsx"));
 const CategoriesPage = lazy(() => import("../pages/CategoriesPage.jsx"));
 
@@ -37,6 +38,7 @@ return (
 
         <Route path="/product/details/:id" element={<ProductDetail/>} />
         <Route path="/cart" element={<CartPage/>} />
+        <Route path="/checkout" element={<OrderSummaryPage/>} />
         <Route path="/shop" element={<ShopPage/>} />
         <Route path="/categories" element={<CategoriesPage/>} />
         <Route path="*" element={<NotFound/>} />

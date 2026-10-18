@@ -3,8 +3,10 @@ import { Link } from 'react-router';
 import { ChevronDown, LogOut, UserRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import '../css/header.css';
+import { useCart } from '../context/CartContext.jsx';
 
 const Header = () => {
+  const {cart} = useCart()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, loading, signOut } = useAuth();
@@ -64,7 +66,7 @@ const Header = () => {
 
           <Link to="/cart" className="icon-btn cart-btn" aria-label="Shopping Cart">
             🛒
-            <span className="badge-count">2</span>
+            <span className="badge-count">{cart?.length>0 ? cart?.length : 0}</span>
           </Link>
 
           {user ? (

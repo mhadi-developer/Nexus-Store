@@ -14,6 +14,12 @@ class User(Base):
     profileImage:Mapped[str | None]=mapped_column(String(255),default=None, nullable=True)  
     password:Mapped[str] = mapped_column(String(50), nullable=False)
     
+    cart: Mapped[Cart | None] = relationship(
+        back_populates="user", 
+        uselist=False, 
+        cascade="all, delete-orphan"
+    )
+    
     @property
     def profileImageUrl(self)-> str:
         if self.profileImage:
@@ -36,6 +42,10 @@ class Product(Base):
         back_populates="products"
     )
     
+    cart_items: Mapped[list[CartItem]] = relationship(
+        back_populates="product", 
+        cascade="all, delete-orphan"
+    )
     
     
     
@@ -50,5 +60,28 @@ class Category(Base):
     )
     
     
+    
+class Cart(Base):
+    __tablename__ = "carts"
+    
+    cart_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, nullable=False)
+    
+    user: Mapped[User] = relationship(back_populates="cart")
+    items: Mapped[list[CartItem]] = relationship(
+        back_populates="cart", 
+        cascade="all, delete-orphan"
+    )
+    
+class CartItem(Base):
+    __tablename__ = "cart_items"
+    
+    cart_item_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    cart_id: Mapped[int] = mapped_column(ForeignKey("carts.cart_id"), nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.product_id"), nullable=False)
+    quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    
+    cart: Mapped[Cart] = relationship(back_populates="items")
+    product: Mapped[Product] = relationship(back_populates="cart_items")
     
     

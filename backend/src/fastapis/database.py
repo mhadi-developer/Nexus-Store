@@ -2,6 +2,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
 from typing import Generator
+import redis.asyncio as redis
+
+REDIS_URL = "yard-sepia-tooth-50236.db.redis.io:10147"
+
 SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./nexus.db"
 engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL,
@@ -19,3 +23,10 @@ async def get_db():
         except Exception:
             await session.rollback()
             raise
+        
+async def get_redis():
+    client = redis.from_url(REDIS_URL, decode_responses=True)
+    try:
+        yield client
+    finally:
+        await client.close()

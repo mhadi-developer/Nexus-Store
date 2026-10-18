@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     algoritham:str = "HS256"
     access_token_expires_minute:int = 30
     
+    max_file_upload_bytes: int = 5 * 1024 * 1024
+    
     
     
 settings = Settings() #Loadedfrom .env file
