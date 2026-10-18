@@ -57,6 +57,14 @@ class UpdateProductModel(BaseModel):
 class ProductModelResponse(ProductModel):
       model_config = ConfigDict(from_attributes= True)
       
+class PaginatedProductsResponse(BaseModel):
+    products: list[ProductModelResponse]
+    total:int
+    skip:int
+    limit:int
+    has_more:bool
+    
+      
       
       
       

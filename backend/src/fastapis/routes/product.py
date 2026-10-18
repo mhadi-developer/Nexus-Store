@@ -4,7 +4,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 import asyncio
 
-from ..schema import CreateProductModel, UpdateProductModel
+from ..schema import CreateProductModel, UpdateProductModel, PaginatedProductsResponse, ProductModelResponse
 from ..modals import Product, Category
 from ..database import get_db
 
@@ -15,11 +15,33 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 import asyncio
 
-from ..schema import CreateProductModel, UpdateProductModel
 from ..modals import Product, Category
 from ..database import get_db
 
 router = APIRouter(tags=["Products"])
+
+@router.get("/products/all", response_model=PaginatedProductsResponse)
+async def get_all_products(db: Annotated[AsyncSession, Depends(get_db)],
+                            skip: Annotated[int, Query(ge=0)]=0,
+                            limit:Annotated[int, Query(ge=1 , le=100)]=10
+):
+    
+ count_result = await db.execute(select(func.count(Product.product_id)).select_from(Product))
+ total = count_result.scalar() or 0
+ 
+ product_query = await db.execute(select(Product).offset(skip).limit(limit))
+ products = product_query.scalars().all()
+ 
+ has_more = skip + len(products) < total
+ 
+ return PaginatedProductsResponse(
+     products = [ProductModelResponse.model_validate(Product) for Product in products],
+     total = total,
+     skip= skip,
+     limit = limit,
+     has_more = has_more
+ ) 
+
 @router.get("/products")
 async def get_products(
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -54,6 +76,7 @@ async def get_products(
         "in_stock": p.product_in_stock,
         "quantity": p.product_quantity
     } for p in products]
+
 
 @router.get("/product/details/{product_id}")
 async def get_product_by_id(product_id: int, db: Annotated[AsyncSession, Depends(get_db)]):

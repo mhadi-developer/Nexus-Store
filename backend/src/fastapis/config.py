@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     access_token_expires_minute:int = 30
     
     max_file_upload_bytes: int = 5 * 1024 * 1024
+    products_per_page:int = 10
     
     
     

@@ -20,23 +20,35 @@ export default function ShopPage() {
   const [products, setProducts] = useState([]);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
+  const [skip, setSkip] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const pageSize = 12;
 
   useEffect(() => {
     const controller = new AbortController();
 
     async function loadProducts() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/products`, {
+        setLoading(true);
+        setError('');
+        const params = new URLSearchParams({ skip: String(skip), limit: String(pageSize) });
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/products/all?${params}`, {
           headers: { 'Content-Type': 'application/json' },
           signal: controller.signal,
         });
         if (!response.ok) throw new Error('Could not load products. Please try again.');
         const data = await response.json();
-        setProducts(Array.isArray(data) ? data.map(normalizeProduct) : []);
+        setProducts(Array.isArray(data.products) ? data.products.map(normalizeProduct) : []);
+        setTotal(Number(data.total) || 0);
+        setHasMore(Boolean(data.has_more));
       } catch (loadError) {
-        if (loadError.name !== 'AbortError') setError(loadError.message || 'Could not load products.');
+        if (loadError.name !== 'AbortError') {
+          setError(loadError.message || 'Could not load products.');
+          setProducts([]);
+        }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
@@ -44,7 +56,11 @@ export default function ShopPage() {
 
     loadProducts();
     return () => controller.abort();
-  }, []);
+  }, [skip]);
+
+  useEffect(() => {
+    setSkip(0);
+  }, [query, category]);
 
   const categories = useMemo(
     () => ['All', ...new Set(products.map((product) => product.category).filter(Boolean))],
@@ -73,7 +89,7 @@ export default function ShopPage() {
       <section className="shop-catalog" aria-label="Product catalog">
         <div className="shop-toolbar">
           <div className="shop-result-count" aria-live="polite">
-            {visibleProducts.length} {visibleProducts.length === 1 ? 'product' : 'products'}
+            {visibleProducts.length} shown · {total} total
           </div>
           <label className="shop-search">
             <Search size={18} aria-hidden="true" />
@@ -123,6 +139,18 @@ export default function ShopPage() {
               </article>
             ))}
           </div>
+        )}
+
+        {!error && total > 0 && (
+          <nav className="shop-pagination" aria-label="Product pages">
+            <button type="button" onClick={() => setSkip((current) => Math.max(0, current - pageSize))} disabled={skip === 0 || loading}>
+              Previous
+            </button>
+            <span>Page {Math.floor(skip / pageSize) + 1} of {Math.max(1, Math.ceil(total / pageSize))}</span>
+            <button type="button" onClick={() => setSkip((current) => current + pageSize)} disabled={!hasMore || loading}>
+              Next
+            </button>
+          </nav>
         )}
       </section>
     </main>
