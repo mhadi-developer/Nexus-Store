@@ -20,12 +20,32 @@ class User(Base):
         cascade="all, delete-orphan"
     )
     
+    reset_tokens: Mapped[list[PasswordResetToken]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    
     @property
     def profileImageUrl(self)-> str:
         if self.profileImage:
             return f"./user/media/profil_pics/{self.profileImage}"
         return "./user/static/profile_pics/default.jpg"
     
+
+
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
+    
+    id:Mapped[int] = mapped_column(Integer, primary_key=True ,  index=True)
+    user_id:Mapped[int]= mapped_column(ForeignKey("users.id"), nullable=False )
+    token_hash:Mapped[str]=mapped_column(String(64), unique=True , nullable=False)
+    expires_at:Mapped[datetime]= mapped_column(DateTime(timezone=True), nullable=False)
+    created_at:Mapped[datetime]= mapped_column(DateTime(timezone=True), default=lambda:datetime.now(UTC))
+    
+    user: Mapped[User] = relationship(back_populates="password_reset_tokens")
+    
+    
+     
     
 class Product(Base):
     __tablename__="products"

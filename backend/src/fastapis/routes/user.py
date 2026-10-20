@@ -1,17 +1,17 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends , BackgroundTasks
 from typing import Annotated
 from sqlalchemy import select,func
-
+from sqlalchemy import delete as sql_delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from passlib.context import CryptContext
-from datetime import timedelta
+from datetime import timedelta, UTC,datetime
 from fastapi.security import OAuth2PasswordRequestForm
-from ..schema import Token, UserResponseModel, UserCreateModel
-from ..modals import User
+from ..schema import Token, UserResponseModel, UserCreateModel, ForgotPasswordRequest , ChangePasswordRequest , ResetPasswordRequest
+from ..modals import User, PasswordResetToken
 from ..database import get_db
 from ..config import settings
-from ..auth import create_access_token  , verify_password , auth_schema , verify_jwt, current_user
-
+from ..auth import create_access_token  , verify_password , auth_schema , verify_jwt, current_user, generate_password_reset_token,generate_password_reset_token_hash
+from ..email import send_password_reset_email
 router = APIRouter()
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
@@ -84,6 +84,38 @@ async def get_login_user(
        )
     
     return login_user
+
+
+@router.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED)
+async def forgot_passwrd(request_data:ForgotPasswordRequest , background_task:BackgroundTasks, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(select(User).where(func.lower(User.email)== request_data.email.lower()))
+    user = result.scalars().first()
+    
+    if user:
+        await db.execute(sql_delete(PasswordResetToken).where(PasswordResetToken.user_id == user.id))
+        token = generate_password_reset_token()
+        token_hash = generate_password_reset_token_hash(token)
+        expires_at = datetime.now(UTC) + timedelta(minutes= settings.reset_token_expires_minutes)
+        
+        reset_token = PasswordResetToken(
+            user_id= user.id,
+            token_hash = token_hash,
+            expires_at= expires_at
+        )
+        
+        db.add(reset_token)
+        await db.commit()
+        
+        background_task.add_task(
+            send_password_reset_email,
+            to_email=user.email,
+            username= user.userName,
+            token=token
+        )
+        
+    return {
+        "message":"if an account with this email exist you will recieve the email for password reset "
+    }
 
 
 @router.get("/user/{user_id}", response_model=UserResponseModel)

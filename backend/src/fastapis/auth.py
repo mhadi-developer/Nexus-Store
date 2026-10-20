@@ -10,6 +10,8 @@ from typing import Annotated
 from fastapi import Depends, HTTPException , status
 from .modals import User
 from .database import get_db
+import hashlib
+import secret
 
 auth_schema = OAuth2PasswordBearer(tokenUrl="/api/token")
 
@@ -24,6 +26,13 @@ def verify_password(plainPassword:str,hashPassword:str ) -> bool:
 
 
 
+def generate_password_reset_token()-> str:
+    return secret.token_safeurl(32)
+
+
+def generate_password_reset_token_hash(token:str)-> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+    
 
 def create_access_token(data: dict , expires_delta:timedelta | None = None):
      encode = data.copy()
