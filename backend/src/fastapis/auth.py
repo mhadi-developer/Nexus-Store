@@ -27,7 +27,7 @@ def verify_password(plainPassword:str,hashPassword:str ) -> bool:
 
 
 def generate_password_reset_token()-> str:
-    return secrets.token_safeurl(32)
+    return secrets.token_urlsafe(32)
 
 
 def generate_password_reset_token_hash(token:str)-> str:

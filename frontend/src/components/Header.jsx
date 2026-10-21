@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router';
-import { ChevronDown, LogOut, UserRound } from 'lucide-react';
+import { ChevronDown, LockKeyhole, LogOut, UserRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import '../css/header.css';
 import { useCart } from '../context/CartContext.jsx';
@@ -91,6 +91,9 @@ const Header = () => {
                     <strong>{displayName || user.userName}</strong>
                     <span>{user.email}</span>
                   </div>
+                  <Link to="/change-password" className="profile-menu-action" role="menuitem" onClick={() => setIsProfileMenuOpen(false)}>
+                    <LockKeyhole size={17} /> Change password
+                  </Link>
                   <button type="button" className="profile-menu-signout" role="menuitem" onClick={handleSignOut}>
                     <LogOut size={17} /> Sign out
                   </button>

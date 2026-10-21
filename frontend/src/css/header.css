@@ -348,10 +348,28 @@
   transition: background 0.2s ease;
 }
 
+.profile-menu-action {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  margin-top: 7px;
+  padding: 10px 12px;
+  border-radius: 13px;
+  color: var(--primary-color, #2f2b63);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.profile-menu-action:hover { background: #f1efff; }
+
 .profile-menu-signout:hover { background: #fff0f3; }
 
 .profile-trigger:focus-visible,
 .profile-signin:focus-visible,
+.profile-menu-action:focus-visible,
 .profile-menu-signout:focus-visible {
   outline: 3px solid rgba(111, 92, 255, 0.5);
   outline-offset: 3px;

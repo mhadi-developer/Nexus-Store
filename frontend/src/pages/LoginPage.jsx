@@ -105,6 +105,7 @@ export default function LoginPage() {
                 </div>
                 {errors.password && <p className="field-error">{errors.password.message}</p>}
               </div>
+              <p className="login-prompt"><Link to="/forgot-password">Forgot your password?</Link></p>
               <button type="submit" className="btn btn-primary register-submit" disabled={isSubmitting}>
                 {isSubmitting ? "Signing in..." : "Sign in"}{!isSubmitting && <ArrowRight size={19} />}
               </button>
