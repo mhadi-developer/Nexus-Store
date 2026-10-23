@@ -2,25 +2,24 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
+from pathlib import Path
 
-from .database import Base, engine
+from .database import engine
 from .routes import product, category, user
+
+PACKAGE_DIR = Path(__file__).resolve().parent
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Create tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
     yield
-    # Shutdown: Dispose engine
     await engine.dispose()
 
 
 app = FastAPI(lifespan=lifespan)
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/media", StaticFiles(directory="media"), name="media")
+app.mount("/static", StaticFiles(directory=PACKAGE_DIR / "static"), name="static")
+app.mount("/media", StaticFiles(directory=PACKAGE_DIR / "media"), name="media")
 
 app.add_middleware(
     CORSMiddleware,

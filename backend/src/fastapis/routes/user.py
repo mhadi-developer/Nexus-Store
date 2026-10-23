@@ -1,17 +1,17 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends , BackgroundTasks
 from typing import Annotated
 from sqlalchemy import select,func
-
+from sqlalchemy import delete as sql_delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from passlib.context import CryptContext
-from datetime import timedelta
+from datetime import timedelta, UTC,datetime
 from fastapi.security import OAuth2PasswordRequestForm
 from ..schema import Token, UserResponseModel, UserCreateModel
 from ..modals import User
 from ..database import get_db
 from ..config import settings
-from ..auth import create_access_token  , verify_password , auth_schema , verify_jwt, current_user
-
+from ..auth import create_access_token  , verify_password , auth_schema , verify_jwt, current_user, generate_password_reset_token,generate_password_reset_token_hash
+from ..email import send_password_reset_email
 router = APIRouter()
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 

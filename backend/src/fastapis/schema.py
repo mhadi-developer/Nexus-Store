@@ -109,3 +109,18 @@ class CartItemResponse(BaseModel):
 class CartResponse(BaseModel):
     cart_id: str
     items: list[CartItemResponse]
+    
+    
+    
+class ForgotPasswordRequest(BaseModel):
+    email:EmailStr = Field(max_length=80)
+    
+
+class ResetPasswordRequest(BaseModel):
+    token:str = Field(max_length=80)
+    new_password:str = Field(min_length=8)
+    
+    
+class ChangePasswordRequest(BaseModel):
+    current_password:str
+    new_password:str = Field(min_length=8)

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from datetime import UTC, datetime
-from sqlalchemy import Column, Integer, String , Text, DateTime, Float, Boolean, ForeignKey
+from sqlalchemy import Integer, String, DateTime, Float, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .database import Base
 
@@ -12,12 +12,17 @@ class User(Base):
     userName:Mapped[str]= mapped_column(String(50),unique=True, nullable=False)
     email:Mapped[str]= mapped_column(String(80), unique=True, nullable=False)
     profileImage:Mapped[str | None]=mapped_column(String(255),default=None, nullable=True)  
-    password:Mapped[str] = mapped_column(String(50), nullable=False)
+    password:Mapped[str] = mapped_column(String(255), nullable=False)
     
     cart: Mapped[Cart | None] = relationship(
         back_populates="user", 
         uselist=False, 
         cascade="all, delete-orphan"
+    )
+    
+    reset_tokens: Mapped[list[PasswordResetToken]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
     
     @property
@@ -26,6 +31,21 @@ class User(Base):
             return f"./user/media/profil_pics/{self.profileImage}"
         return "./user/static/profile_pics/default.jpg"
     
+
+
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
+    
+    id:Mapped[int] = mapped_column(Integer, primary_key=True ,  index=True)
+    user_id:Mapped[int]= mapped_column(ForeignKey("users.id"), nullable=False )
+    token_hash:Mapped[str]=mapped_column(String(64), unique=True , nullable=False)
+    expires_at:Mapped[datetime]= mapped_column(DateTime(timezone=True), nullable=False)
+    created_at:Mapped[datetime]= mapped_column(DateTime(timezone=True), default=lambda:datetime.now(UTC))
+    
+    user: Mapped[User] = relationship(back_populates="reset_tokens")
+    
+    
+     
     
 class Product(Base):
     __tablename__="products"
@@ -36,7 +56,7 @@ class Product(Base):
     product_in_stock:Mapped[bool]=mapped_column(Boolean, nullable=False)
     product_rating:Mapped[float]=mapped_column(Float, nullable=True , default=0)
     product_category:Mapped[str]=mapped_column(String, nullable=False)
-    product_category_id:Mapped[int]=mapped_column(ForeignKey("categoires.category_id"), nullable=False)
+    product_category_id:Mapped[int]=mapped_column(ForeignKey("categories.category_id"), nullable=False)
     product_img:Mapped[str]=mapped_column(String, nullable=False)
     category: Mapped["Category"] = relationship(
         back_populates="products"
@@ -50,7 +70,7 @@ class Product(Base):
     
     
 class Category(Base):
-    __tablename__="categoires"
+    __tablename__="categories"
     category_name:Mapped[str]=mapped_column(String(50), nullable=False)
     category_id:Mapped[int]=mapped_column(Integer, primary_key=True , index=True)
     category_image: Mapped[str]=mapped_column(String(500), nullable=False)
