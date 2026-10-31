@@ -1,6 +1,7 @@
 from __future__ import annotations
-from datetime import UTC, datetime
-from sqlalchemy import Integer, String, DateTime, Float, Boolean, ForeignKey
+from datetime import UTC, datetime, timezone
+from decimal import Decimal
+from sqlalchemy import Integer, String, DateTime, Float, Boolean, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .database import Base
 
@@ -26,10 +27,10 @@ class User(Base):
     )
     
     @property
-    def profileImageUrl(self)-> str:
+    def profileImageUrl(self) -> str | None:
         if self.profileImage:
-            return f"./user/media/profil_pics/{self.profileImage}"
-        return "./user/static/profile_pics/default.jpg"
+            return f"/media/profile_pics/{self.profileImage}"
+        return None
     
 
 
@@ -104,4 +105,207 @@ class CartItem(Base):
     cart: Mapped[Cart] = relationship(back_populates="items")
     product: Mapped[Product] = relationship(back_populates="cart_items")
     
+    
+
+
+class Order(Base):
+    __tablename__="orders"
+    
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+    
+    
+    order_number: Mapped[str] = mapped_column(
+        String(100),
+        unique=True,
+        nullable=False
+    )
+
+    customer_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"),
+        nullable=False
+    )
+    
+    
+    payment_method: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False
+    )
+    
+    
+    total: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2),
+        nullable=False
+    )
+    
+    payment_status: Mapped[str] = mapped_column(
+        String(30),
+        default="PENDING",
+        nullable=False
+    )
+    
+    
+    order_status: Mapped[str] = mapped_column(
+        String(30),
+        default="PENDING_PAYMENT",
+        nullable=False
+    )
+    
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc)
+    )
+    
+    
+    # Stripe information
+
+    stripe_session_id: Mapped[str | None] = mapped_column(
+        String(255),
+        unique=True,
+        nullable=True
+    )
+    
+    stripe_payment_intent_id: Mapped[str | None] = mapped_column(
+        String(255),
+        unique=True,
+        nullable=True
+    )
+    
+    # Relationships
+
+    customer: Mapped["User"] = relationship()
+
+    items: Mapped[list["OrderItem"]] = relationship(
+        back_populates="order",
+        cascade="all, delete-orphan"
+    )
+    
+    delivery_address: Mapped["OrderDeliveryAddress"] = relationship(
+        back_populates="order",
+        cascade="all, delete-orphan",
+        uselist=False
+    )
+    
+    
+class OrderItem(Base):
+    __tablename__="order_items"
+  
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True
+    )
+
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("orders.id", ondelete="CASCADE"),
+        nullable=False
+    )    
+    
+    product_id: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False
+    )
+
+    product_name: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False
+    )
+    
+    product_image: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True
+    )
+
+    product_price: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2),
+        nullable=False
+    )
+    
+    quantity: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False
+    )
+
+    category_id: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False
+    )
+    
+    
+    category: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False
+    )
+
+    # Relationships
+
+    order: Mapped["Order"] = relationship(
+        back_populates="items"
+    )
+    
+    
+class OrderDeliveryAddress(Base):
+    __tablename__="order_delivery_address"
+    
+    
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True
+    )
+    
+    
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("orders.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False
+    )
+    
+    address_line: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False
+    )
+    
+    
+    
+    apartment: Mapped[str] = mapped_column(
+        String(100),
+        default="",
+        nullable=False
+    )
+    
+    city: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False
+    )
+
+    country: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False
+    )
+    
+    phone: Mapped[str] = mapped_column(
+        String(30),
+        nullable=False
+    )
+
+    postal_code: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False
+    )
+    
+    region: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False
+    )
+
+    order: Mapped["Order"] = relationship(
+        back_populates="delivery_address"
+    )
+
+
+
+
+
     

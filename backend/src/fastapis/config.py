@@ -1,9 +1,14 @@
-from pydantic import SecretStr
+from pathlib import Path
+
+from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+PACKAGE_DIR = Path(__file__).resolve().parent
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=PACKAGE_DIR / ".env",
         env_file_encoding="utf-8",
     )
     
@@ -23,6 +28,13 @@ class Settings(BaseSettings):
     mail_from:str = "hadiquershi08@gmail.com"
     mail_use_tls: bool = True
     frontend_url: str = "http://localhost:5173"
+    
+    stripe_public_key: str = Field(
+        validation_alias=AliasChoices("stripe_public_key", "stripe_published_key")
+    )
+    stripe_secret_key:SecretStr
+    stripe_webhook_secret: SecretStr
+    
     
     
     

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { CheckCircle2, PackageCheck, ShoppingBag } from 'lucide-react';
+import { CreditCard, PackageCheck, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import '../css/order-summary-page.css';
@@ -9,10 +9,10 @@ const blankAddress = { phone: '', addressLine: '', apartment: '', city: '', regi
 
 export default function OrderSummaryPage() {
   const { user, loading } = useAuth();
-  const { cart, clearCart } = useCart();
+  const { cart } = useCart();
   const navigate = useNavigate();
   const [address, setAddress] = useState(blankAddress);
-  const [placedOrder, setPlacedOrder] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('cash_on_delivery');
   const [error, setError] = useState('');
   const addressKey = `delivery_address_${user?.id ?? 'guest'}`;
 
@@ -40,7 +40,7 @@ export default function OrderSummaryPage() {
     setAddress((current) => ({ ...current, [name]: value }));
   };
 
-  const confirmOrder = (event) => {
+  const confirmOrder = async (event) => {
     event.preventDefault();
     if (!user) {
       navigate('/login');
@@ -50,44 +50,66 @@ export default function OrderSummaryPage() {
       setError('Your cart is empty. Add items before confirming an order.');
       return;
     }
-    const order = {
-      orderNumber: `ORD-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      customer: { id: user.id, name: `${user.firstName} ${user.lastName}`.trim(), email: user.email },
-      deliveryAddress: address,
-      items,
-      total: subtotal,
-      paymentMethod: 'Cash on delivery',
+    const orderRequest = {
+      deliveryAddress: {
+        addressLine: address.addressLine,
+        apartment: address.apartment,
+        city: address.city,
+        country: address.country,
+        phone: address.phone,
+        postalCode: address.postalCode,
+        region: address.region,
+      },
+      items: items.map((item) => ({
+        product_id: Number(item.id),
+        quantity: item.quantity,
+      })),
+      paymentMethod: paymentMethod === 'stripe' ? 'Stripe' : 'Cash on delivery',
     };
-    console.log('Order confirmation payload:', order);
+    console.log('Final checkout payload:', orderRequest);
+
     try {
-      localStorage.setItem(addressKey, JSON.stringify(address));
-      const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-      localStorage.setItem('orders', JSON.stringify([order, ...savedOrders]));
-      clearCart();
-      setPlacedOrder(order);
-      setError('');
-    } catch {
-      setError('Could not save your order in this browser. Please try again.');
+      const token = window.localStorage.getItem('access_token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/checkout`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderRequest),
+      });
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        const detail = data?.detail;
+        const message = Array.isArray(detail)
+          ? detail.map((item) => item.msg).filter(Boolean).join(' ')
+          : detail;
+        throw new Error(typeof message === 'string' ? message : `Checkout failed (${response.status}).`);
+      }
+
+      if (data?.payment_method === 'Stripe' && data.checkout_url) {
+        window.location.assign(data.checkout_url);
+        return;
+      }
+
+      if (data?.payment_method === 'Cash on delivery' && data.order_number) {
+        navigate(`/order-success/${encodeURIComponent(data.order_number)}?type=order`);
+        return;
+      }
+
+      throw new Error('The checkout response did not contain the expected order details.');
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Unable to process your order.');
     }
   };
 
   if (loading) return <main className="order-page"><p>Loading your account…</p></main>;
-
-  if (placedOrder) {
-    return (
-      <main className="order-page">
-        <section className="order-success">
-          <CheckCircle2 size={54} aria-hidden="true" />
-          <p className="order-eyebrow">ORDER CONFIRMED</p>
-          <h1>Thank you, {placedOrder.customer.name || user?.userName}!</h1>
-          <p>Your order <strong>{placedOrder.orderNumber}</strong> has been saved.</p>
-          <p>A confirmation for ${placedOrder.total.toFixed(2)} is ready for {placedOrder.customer.email}.</p>
-          <Link className="order-primary-link" to="/shop">Continue shopping</Link>
-        </section>
-      </main>
-    );
-  }
 
   if (!user) {
     return (
@@ -141,8 +163,32 @@ export default function OrderSummaryPage() {
             </section>
 
             <section className="order-card">
-              <div className="order-section-heading"><span>03</span><div><h2>Payment method</h2><p>Payment is collected on delivery</p></div></div>
-              <div className="order-payment"><PackageCheck size={22} /><span><strong>Cash on delivery</strong><small>Pay when your order arrives.</small></span></div>
+              <div className="order-section-heading"><span>03</span><div><h2>Payment method</h2><p>Choose how you would like to pay.</p></div></div>
+              <fieldset className="order-payment-options">
+                <legend className="visually-hidden">Choose a payment method</legend>
+                <label className={`order-payment-option${paymentMethod === 'stripe' ? ' selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="stripe"
+                    checked={paymentMethod === 'stripe'}
+                    onChange={() => setPaymentMethod('stripe')}
+                  />
+                  <CreditCard size={22} aria-hidden="true" />
+                  <span><strong>Stripe</strong><small>Card payments are not processed yet.</small></span>
+                </label>
+                <label className={`order-payment-option${paymentMethod === 'cash_on_delivery' ? ' selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="cash_on_delivery"
+                    checked={paymentMethod === 'cash_on_delivery'}
+                    onChange={() => setPaymentMethod('cash_on_delivery')}
+                  />
+                  <PackageCheck size={22} aria-hidden="true" />
+                  <span><strong>Cash on delivery</strong><small>Pay when your order arrives.</small></span>
+                </label>
+              </fieldset>
             </section>
           </div>
 
@@ -159,9 +205,9 @@ export default function OrderSummaryPage() {
             </div>
             <div className="order-total-row"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
             <div className="order-total-row"><span>Delivery</span><span>Free</span></div>
-            <div className="order-grand-total"><span>Total due on delivery</span><strong>${subtotal.toFixed(2)}</strong></div>
+            <div className="order-grand-total"><span>{paymentMethod === 'cash_on_delivery' ? 'Total due on delivery' : 'Order total'}</span><strong>${subtotal.toFixed(2)}</strong></div>
             {error && <p className="order-error" role="alert">{error}</p>}
-            <button className="order-confirm-button" type="submit">Confirm order · ${subtotal.toFixed(2)}</button>
+            <button className="order-confirm-button" type="submit">Log checkout payload · ${subtotal.toFixed(2)}</button>
             <Link className="order-back-link" to="/cart">Return to cart</Link>
           </aside>
         </form>

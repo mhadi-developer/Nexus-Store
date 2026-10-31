@@ -1,5 +1,7 @@
+from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, EmailStr
-
+from datetime import datetime
+from decimal import Decimal 
 
 
 class UserBase(BaseModel):
@@ -20,6 +22,7 @@ class UserCreateModel(UserBase):
 class UserResponseModel(UserBase):
     model_config= ConfigDict(from_attributes=True)
     id:int
+    profileImageUrl: str | None
 
 class ProductModel(BaseModel):
     product_id: int
@@ -124,3 +127,98 @@ class ResetPasswordRequest(BaseModel):
 class ChangePasswordRequest(BaseModel):
     current_password:str
     new_password:str = Field(min_length=8)
+
+def to_camel(string: str) -> str:
+    first, *remaining = string.split("_")
+    return first + "".join(word.capitalize() for word in remaining)
+
+
+class OrderBaseSchema(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+# =========================
+# REQUEST SCHEMAS
+# =========================
+
+class OrderDeliveryAddressCreate(OrderBaseSchema):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        extra="forbid",
+    )
+
+    address_line: str = Field(min_length=1, max_length=255)
+    apartment: str = Field(default="", max_length=100)
+    city: str = Field(min_length=1, max_length=100)
+    country: str = Field(min_length=1, max_length=100)
+    phone: str = Field(min_length=1, max_length=30)
+    postal_code: str = Field(min_length=1, max_length=20)
+    region: str = Field(min_length=1, max_length=100)
+
+
+class OrderItemCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    product_id: int = Field(gt=0)
+    quantity: int = Field(gt=0)
+
+
+class OrderCreateRequest(OrderBaseSchema):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        extra="forbid",
+    )
+
+    delivery_address: OrderDeliveryAddressCreate
+    items: list[OrderItemCreate] = Field(min_length=1)
+
+    payment_method: Literal[
+        "Stripe",
+        "Cash on delivery",
+    ]
+
+
+# =========================
+# RESPONSE SCHEMAS
+# =========================
+
+class CustomerResponse(OrderBaseSchema):
+    id: int
+    name: str
+    email: str
+
+
+class DeliveryAddressResponse(OrderBaseSchema):
+    address_line: str
+    apartment: str
+    city: str
+    country: str
+    phone: str
+    postal_code: str
+    region: str
+
+
+class OrderItemResponse(OrderBaseSchema):
+    product_id: int
+    name: str
+    image: str | None = None
+    price: Decimal
+    quantity: int
+    category: str
+    category_id: int
+
+
+class OrderConfirmationResponse(OrderBaseSchema):
+    created_at: datetime
+    customer: CustomerResponse
+    delivery_address: DeliveryAddressResponse
+    items: list[OrderItemResponse]
+    order_number: str
+    payment_method: str
+    total: Decimal

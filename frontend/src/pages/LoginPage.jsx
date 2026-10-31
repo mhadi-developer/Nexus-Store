@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowRight, CheckCircle2, CircleAlert, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, Sparkles, UserRound } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate , Navigate } from "react-router";
 import { useAuth } from "../context/AuthContext.jsx";
 import "../css/register-page.css";
 
@@ -29,6 +29,10 @@ export default function LoginPage() {
     defaultValues: { email: "", password: "" },
   });
 
+  const {user} = useAuth()
+
+  if(user?.email) return <Navigate to={'/'}/>
+
   const onSubmit = async ({ email, password }) => {
     setSubmitError("");
     try {
@@ -53,6 +57,8 @@ export default function LoginPage() {
       setSubmitError(error instanceof Error ? error.message : "Unable to sign in. Please try again.");
     }
   };
+
+
 
   return (
     <main className="register-page login-page">
@@ -105,6 +111,7 @@ export default function LoginPage() {
                 </div>
                 {errors.password && <p className="field-error">{errors.password.message}</p>}
               </div>
+              <p className="login-prompt"><Link to="/forgot-password">Forgot your password?</Link></p>
               <button type="submit" className="btn btn-primary register-submit" disabled={isSubmitting}>
                 {isSubmitting ? "Signing in..." : "Sign in"}{!isSubmitting && <ArrowRight size={19} />}
               </button>

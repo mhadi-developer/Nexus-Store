@@ -23,11 +23,20 @@ dependencies = [
     "redis>=8.1.0",
     "aiosmtplib>=5.1.3",
     "jinja2>=3.1.6",
+    "boto3>=1.43.118",
+    "pytest>=9.1.1",
+    "stripe>=16.1.0",
+    "python-dotenv>=1.2.4",
 ]
 
 [project.scripts]
-fastapis = "fastapis:main"
+fastapis = "fastapi.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.12.22,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.16.0",
+]

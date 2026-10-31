@@ -15,7 +15,7 @@ import {
   CheckCircle2,
   CircleAlert,
 } from "lucide-react";
-import { Link } from "react-router";
+import { Link , Navigate } from "react-router";
 
 import { z } from "zod";
 
@@ -44,6 +44,9 @@ export default function Register() {
   const [submitError, setSubmitError] = useState("");
   const [registered, setRegistered] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const {user} = useAuth()
+  
+  if(user?.email) return <Navigate to={"/"} replace/>
 
 const {
   register,
@@ -125,6 +128,9 @@ const onSubmit = async (values) => {
     );
   }
 };
+
+
+
   return (
     <main className="register-page">
       <div className="register-decoration decoration-one" />
@@ -138,7 +144,7 @@ const onSubmit = async (values) => {
             <span className="register-brand-icon">
               <Sparkles size={24} />
             </span>
-            <span className="logo">ClaySpace</span>
+            <span className="logo">Nexus Store</span>
           </a>
 
           <div className="intro-content">

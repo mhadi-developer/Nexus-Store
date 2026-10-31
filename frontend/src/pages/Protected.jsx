@@ -1,6 +1,13 @@
-export default  function ProtectRoutes({children}){
- // Keep rendering while the profile request runs. Authentication state is
- // still available to components through AuthContext, and this route currently
- // does not reject unauthenticated users after loading completes.
-  return children;
+import {useAuth} from "../context/AuthContext"
+import Loader from "../components/Loader"
+import {Navigate} from "react-router"
+
+export default function ProtectedPage({children}){
+  const {user , loading } = useAuth();
+
+  if (loading) return <Loader/>
+
+  if(!user?.email ) return <Navigate to={'/login'}  replace/>
+
+  return children
 }
