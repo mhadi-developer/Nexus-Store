@@ -37,5 +37,4 @@ class Settings(BaseSettings):
     
     
     
-    
 settings = Settings() #Loadedfrom .env file

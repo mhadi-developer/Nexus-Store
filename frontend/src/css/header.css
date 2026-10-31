@@ -429,6 +429,7 @@
 
 .profile-trigger:focus-visible,
 .profile-signin:focus-visible,
+.profile-menu-link:focus-visible,
 .profile-menu-signout:focus-visible {
   outline: 3px solid rgba(111, 92, 255, 0.5);
   outline-offset: 3px;
