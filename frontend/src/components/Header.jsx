@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router';
-import { Camera, ChevronDown, LockKeyhole, LogOut, Trash2, UserRound } from 'lucide-react';
+import { Camera, ChevronDown, LockKeyhole, LogOut, ShoppingBag, Trash2, UserRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import '../css/header.css';
 import { useCart } from '../context/CartContext.jsx';
@@ -170,6 +170,14 @@ const Header = () => {
                     <strong>{displayName || user.userName}</strong>
                     <span>{user.email}</span>
                   </div>
+                  <Link
+                    to="/orders"
+                    className="profile-menu-link"
+                    role="menuitem"
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    <ShoppingBag size={17} /> My orders
+                  </Link>
                   <Link
                     to="/change-password"
                     className="profile-menu-link"

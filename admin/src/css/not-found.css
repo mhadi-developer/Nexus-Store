@@ -1,0 +1,266 @@
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap");
+
+:root {
+  --nx-ink: #0b1030;
+  --nx-ink-2: #141a47;
+  --nx-indigo: #5b6cff;
+  --nx-teal: #19d3c5;
+  --nx-rose: #ff6bb5;
+  --nx-amber: #ffc46b;
+  --nx-text: #eef1ff;
+  --nx-muted: #a6adcf;
+  --nx-glass: rgba(255, 255, 255, 0.08);
+  --nx-glass-strong: rgba(255, 255, 255, 0.14);
+  --nx-edge: rgba(255, 255, 255, 0.2);
+  --nx-edge-soft: rgba(255, 255, 255, 0.1);
+  --nx-radius: 22px;
+  --nx-radius-sm: 12px;
+  --nx-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --nx-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--nx-body);
+  color: var(--nx-text);
+  background: var(--nx-ink);
+}
+
+/* ---------- Backdrop: colored light for the glass to refract ---------- */
+.nx-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(60rem 40rem at 12% -10%, rgba(91, 108, 255, 0.55), transparent 60%),
+    radial-gradient(50rem 36rem at 95% 10%, rgba(25, 211, 197, 0.35), transparent 60%),
+    radial-gradient(46rem 34rem at 60% 110%, rgba(255, 107, 181, 0.35), transparent 60%),
+    linear-gradient(160deg, var(--nx-ink) 0%, var(--nx-ink-2) 100%);
+}
+
+.nx-shell::before,
+.nx-shell::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(8px);
+  pointer-events: none;
+}
+.nx-shell::before {
+  width: 22rem; height: 22rem;
+  top: 28%; left: -6rem;
+  background: radial-gradient(circle at 30% 30%, var(--nx-teal), transparent 70%);
+  opacity: 0.45;
+}
+.nx-shell::after {
+  width: 26rem; height: 26rem;
+  bottom: 6%; right: -8rem;
+  background: radial-gradient(circle at 40% 40%, var(--nx-rose), transparent 70%);
+  opacity: 0.4;
+}
+
+/* ---------- Glass primitive ---------- */
+.nx-glass {
+  background: var(--nx-glass);
+  border: 1px solid var(--nx-edge);
+  border-radius: var(--nx-radius);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 20px 50px -20px rgba(3, 6, 30, 0.7);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nx-glass { background: rgba(28, 34, 84, 0.92); }
+}
+
+:focus-visible {
+  outline: 2px solid var(--nx-teal);
+  outline-offset: 2px;
+}
+
+/* ---------- Header ---------- */
+.nx-header {
+  position: sticky;
+  top: 12px;
+  z-index: 20;
+  margin: 12px 16px 0;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border-radius: 999px;
+}
+.nx-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--nx-text);
+  text-decoration: none;
+  font-family: var(--nx-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+.nx-brand-mark {
+  width: 34px; height: 34px;
+  border-radius: 11px;
+  display: grid; place-items: center;
+  background: linear-gradient(140deg, var(--nx-indigo), var(--nx-teal));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.nx-brand-tag {
+  font-family: var(--nx-body);
+  font-weight: 500;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--nx-glass-strong);
+  border: 1px solid var(--nx-edge-soft);
+  color: var(--nx-muted);
+}
+
+/* ---------- 404 page ---------- */
+.nx-nf-main {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px 56px;
+}
+
+.nx-nf-card {
+  width: 100%;
+  max-width: 640px;
+  padding: clamp(28px, 6vw, 56px) clamp(20px, 5vw, 48px);
+  text-align: center;
+}
+
+/* The numerals: the "0" is a glass lens with a lost light inside it */
+.nx-nf-digits {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.04em;
+  margin-bottom: clamp(20px, 4vw, 32px);
+  font-family: var(--nx-display);
+  font-weight: 800;
+  font-size: clamp(5.5rem, 24vw, 10.5rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--nx-text);
+  user-select: none;
+}
+.nx-nf-digit {
+  text-shadow: 0 12px 40px rgba(91, 108, 255, 0.55);
+}
+
+.nx-nf-zero {
+  position: relative;
+  display: block;
+  width: 0.78em;
+  height: 0.78em;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--nx-glass-strong);
+  border: 1px solid var(--nx-edge);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -18px 30px -12px rgba(25, 211, 197, 0.25),
+    0 18px 40px -16px rgba(3, 6, 30, 0.8);
+  -webkit-backdrop-filter: blur(6px) saturate(180%);
+  backdrop-filter: blur(6px) saturate(180%);
+}
+.nx-nf-orb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 46%;
+  height: 46%;
+  margin: -23% 0 0 -23%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--nx-amber), var(--nx-rose) 55%, transparent 72%);
+  filter: blur(2px);
+  animation: nx-nf-drift 9s ease-in-out infinite alternate;
+}
+
+@keyframes nx-nf-drift {
+  0%   { transform: translate(-38%, -30%); }
+  50%  { transform: translate(34%, 8%); }
+  100% { transform: translate(-6%, 36%); }
+}
+
+.nx-nf-title {
+  margin: 0 0 12px;
+  font-family: var(--nx-display);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.nx-nf-text {
+  margin: 0 auto 28px;
+  max-width: 44ch;
+  color: var(--nx-muted);
+  font-size: 1.02rem;
+  line-height: 1.6;
+}
+
+.nx-nf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.nx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 24px;
+  border-radius: 999px;
+  border: 1px solid var(--nx-edge);
+  font: 600 0.95rem var(--nx-body);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.nx-btn:active { transform: translateY(1px); }
+
+.nx-btn-primary {
+  color: var(--nx-ink);
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--nx-indigo), var(--nx-teal));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 10px 28px -10px rgba(91, 108, 255, 0.8);
+}
+.nx-btn-primary:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 14px 34px -10px rgba(25, 211, 197, 0.8);
+}
+
+.nx-btn-ghost {
+  color: var(--nx-text);
+  background: var(--nx-glass);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.nx-btn-ghost:hover { background: var(--nx-glass-strong); }
+
+@media (max-width: 480px) {
+  .nx-nf-actions { flex-direction: column; }
+  .nx-btn { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nx-nf-orb { animation: none; }
+  .nx-btn { transition: none; }
+}

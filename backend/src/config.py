@@ -2,6 +2,7 @@ from pathlib import Path
 
 from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine import make_url
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 
@@ -38,3 +39,16 @@ class Settings(BaseSettings):
     
     
 settings = Settings() #Loadedfrom .env file
+
+
+def asyncpg_compatible_database_url(database_url: str) -> str:
+    """Translate libpq URL options to options accepted by asyncpg."""
+    url = make_url(database_url)
+    if url.drivername != "postgresql+asyncpg":
+        return database_url
+
+    query = dict(url.query)
+    if "sslmode" in query:
+        query["ssl"] = query.pop("sslmode")
+    query.pop("channel_binding", None)
+    return url.set(query=query).render_as_string(hide_password=False)

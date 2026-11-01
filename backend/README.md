@@ -1,5 +1,50 @@
 # Backend database setup
 
+## Run the full stack with Docker Compose
+
+From the repository root, copy `.env.example` to `.env` and replace the
+placeholder secrets and Stripe test credentials. The example database
+password uses URL-safe characters; URL-encode it if you change it to include
+reserved URL characters.
+
+```powershell
+Copy-Item .env.example .env
+docker compose up --build -d
+docker compose ps
+```
+
+Open the storefront at `http://localhost:8080`. The frontend proxies API and
+media requests through Nginx, the backend waits for PostgreSQL and applies
+Alembic migrations before starting, and PostgreSQL data and uploaded media are
+stored in named Docker volumes. The API is also available on
+`http://localhost:8000`.
+
+Stop the services with `docker compose down`. To also delete the database and
+uploaded-media volumes, run `docker compose down --volumes`.
+
+## Docker
+
+Build the production image from the repository root:
+
+```powershell
+docker build -t nexus-backend ./backend
+```
+
+Run it with the required settings supplied through an environment file that is
+not committed to source control:
+
+```powershell
+docker run --rm -p 8000:8000 --env-file backend/.env.docker nexus-backend
+```
+
+Set `DATABASE_URL` to a database reachable from the container and provide the
+required secret and Stripe settings (`SECRET_KEY`, `STRIPE_PUBLIC_KEY`,
+`STRIPE_SECRET_KEY`, and `STRIPE_WEBHOOK_SECRET`). Apply schema migrations
+before starting the API with `docker run ... nexus-backend alembic upgrade head`.
+The runtime image runs as a non-root user. Mount persistent storage at
+`/app/src/media` if uploaded profile pictures must survive container
+replacement.
+
 The API uses PostgreSQL through SQLAlchemy's async driver. Alembic owns the
 database schema; the application no longer creates tables during startup.
 
@@ -10,6 +55,10 @@ database schema; the application no longer creates tables during startup.
    `postgresql+asyncpg` driver. Application settings load this package-local
    file regardless of which directory you launch the server from; environment
    variables override values in the file.
+   For TLS, use `ssl=require` in the URL. If a provider URL includes
+   `sslmode=require&channel_binding=require`, `sslmode` is translated to
+   asyncpg's `ssl` option and the unsupported `channel_binding` option is
+   removed; asyncpg does not enforce channel binding.
 4. Apply the schema with `uv run alembic upgrade head`.
 5. To copy records from the bundled SQLite database, run
    `uv run python -m fastapis.migrate_sqlite` after applying the schema.

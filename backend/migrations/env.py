@@ -5,22 +5,23 @@ from sqlalchemy.engine import Connection
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from fastapis.config import settings
-from fastapis.database import Base
-from fastapis import modals as _models
+from src.config import asyncpg_compatible_database_url, settings
+from src.database import Base
+from src import modals as _models
 
 config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", settings.database_url.replace("%", "%%"))
+database_url = asyncpg_compatible_database_url(settings.database_url)
+config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
 target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
     context.configure(
-        url=settings.database_url,
+        url=database_url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},

@@ -16,6 +16,8 @@ const CartPage = lazy(() => import("../pages/CartPage.jsx"));
 const OrderSummaryPage = lazy(() => import("../pages/OrderSummaryPage.jsx"));
 const OrderSuccessPage = lazy(() => import("../pages/OrderSuccessPage.jsx"));
 const OrderCancelPage = lazy(() => import("../pages/OrderCancelPage.jsx"));
+const OrdersPage = lazy(() => import("../pages/OrdersPage.jsx"));
+const OrderDetailsPage = lazy(() => import("../pages/OrderDetailsPage.jsx"));
 const ShopPage = lazy(() => import("../pages/ShopPage.jsx"));
 const CategoriesPage = lazy(() => import("../pages/CategoriesPage.jsx"));
 
@@ -46,6 +48,8 @@ return (
         <Route path="/checkout" element={<OrderSummaryPage/>} />
         <Route path="/order-success/:sessionId" element={<OrderSuccessPage/>} />
         <Route path="/order-cancel" element={<OrderCancelPage/>} />
+        <Route path="/orders" element={<ProtectRoutes><OrdersPage/></ProtectRoutes>} />
+        <Route path="/orders/:orderId" element={<ProtectRoutes><OrderDetailsPage/></ProtectRoutes>} />
         <Route path="/shop" element={<ShopPage/>} />
         <Route path="/categories" element={<CategoriesPage/>} />
         <Route path="*" element={<NotFound/>} />

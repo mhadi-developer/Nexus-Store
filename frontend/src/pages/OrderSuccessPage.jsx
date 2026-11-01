@@ -7,6 +7,12 @@ export default function OrderSuccessPage() {
   const [searchParams] = useSearchParams();
   const isCashOrder = searchParams.get('type') === 'order';
 
+  if(sessionId && searchParams){
+    window.localStorage.removeItem('cart');
+    window.localStorage.removeItem(`delivery_address_${window.localStorage.getItem('user_id') ?? 'guest'}`);
+    window.localStorage.removeItem('orders');
+  }
+
   return (
     <main className="order-outcome-page">
       <section className="order-outcome-card order-outcome-success" aria-labelledby="order-outcome-title">

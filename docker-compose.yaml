@@ -1,0 +1,128 @@
+services:
+  # ──────────────────────────────────────────────
+  # Database
+  # ──────────────────────────────────────────────
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: nexus_store
+      POSTGRES_USER: nexus_store
+      POSTGRES_PASSWORD: nexus-local-password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexus_store -d nexus_store"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────
+  # One-shot migration runner (runs then exits)
+  # ──────────────────────────────────────────────
+  migrate:
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/src/.env          # picks up DATABASE_URL, SECRET_KEY, etc.
+    # Override DATABASE_URL to point at the Docker db container (not Neon)
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://nexus_store:nexus-local-password@db:5432/nexus_store"
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  # ──────────────────────────────────────────────
+  # Backend  (FastAPI / uvicorn)  →  :8000
+  # ──────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/src/.env          # picks up all backend env vars
+    # Override DATABASE_URL to point at the Docker db container (not Neon)
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://nexus_store:nexus-local-password@db:5432/nexus_store"
+      FRONTEND_URL: "http://localhost:8081"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - media-data:/app/src/media
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────
+  # Frontend  (React/Vite → Nginx)  →  :8081 (host) / :8080 (container)
+  #
+  # Nginx proxies these paths to the backend container:
+  #   /api/    → http://backend:8000/api/
+  #   /media/  → http://backend:8000/media/
+  #   /static/ → http://backend:8000/static/
+  #   /health  → http://backend:8000/health
+  # ──────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked into the JS bundle at build time.
+        # "/api" routes through Nginx's reverse proxy, so the browser
+        # never needs to know the backend port directly.
+        VITE_BACKEND_URL: /api
+    ports:
+      # Host 8081 -> container 8080 (8080 on the host is occupied by AgentService)
+      - "127.0.0.1:8081:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────
+  # Admin  (React/Vite → Nginx)  →  :8082 (host) / :8080 (container)
+  #
+  # Same reverse-proxy contract as the frontend: Nginx forwards
+  #   /api/  /media/  /static/  /health  →  http://backend:8000
+  # ──────────────────────────────────────────────
+  admin:
+    build:
+      context: ./admin
+      args:
+        # Baked into the JS bundle at build time.
+        VITE_BACKEND_URL: /api
+    ports:
+      - "127.0.0.1:8082:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  media-data:

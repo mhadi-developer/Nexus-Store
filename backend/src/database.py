@@ -1,12 +1,15 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
-from .config import settings
+from .config import asyncpg_compatible_database_url, settings
 import redis.asyncio as redis
 
 REDIS_URL = "yard-sepia-tooth-50236.db.redis.io:10147"
 
-engine = create_async_engine(settings.database_url, pool_pre_ping=True)
+engine = create_async_engine(
+    asyncpg_compatible_database_url(settings.database_url),
+    pool_pre_ping=True,
+)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 class Base(DeclarativeBase):

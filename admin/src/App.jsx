@@ -4,6 +4,7 @@ import Homepage from "./pages/Homepage"
 import ProductsPage from "./pages/ProductsPage"
 import CategoriesPage from "./pages/CategoriesPage"
 import { ToastProvider } from "./components/ToastProvider.jsx"
+import NotFoundPage from "./pages/NotFound.jsx"
 
 export default function App(){
 
@@ -16,6 +17,7 @@ export default function App(){
         <Route path="/admin" element={<Homepage/>}/>
         <Route path="/admin/products" element={<ProductsPage/>}/>
         <Route path="/admin/categories" element={<CategoriesPage/>}/>
+        <Route path="*" element={<NotFoundPage/>}/>
       </Routes>
     </BrowserRouter>
     </ToastProvider>

@@ -2,6 +2,19 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Docker
+
+Build the production image from the repository root. Set `VITE_BACKEND_URL`
+to the API URL reachable by the user's browser; it is embedded at build time.
+
+```powershell
+docker build --build-arg VITE_BACKEND_URL=http://localhost:8000/api -t nexus-frontend ./frontend
+docker run --rm -p 5173:8080 nexus-frontend
+```
+
+Open `http://localhost:5173`. The image builds the Vite app in a Node stage and
+serves the static output with unprivileged Nginx.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)

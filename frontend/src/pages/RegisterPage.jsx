@@ -16,6 +16,7 @@ import {
   CircleAlert,
 } from "lucide-react";
 import { Link , Navigate } from "react-router";
+import { useAuth } from "../context/AuthContext.jsx";
 
 import { z } from "zod";
 

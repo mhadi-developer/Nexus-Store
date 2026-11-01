@@ -1,0 +1,346 @@
+.order-history-page {
+  width: min(1120px, 100%);
+  min-height: 62vh;
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem 5rem;
+  color: var(--primary-color, #2f2b63);
+}
+
+.order-history-heading {
+  margin-bottom: 2rem;
+}
+
+.order-history-eyebrow {
+  margin: 0 0 0.45rem;
+  color: var(--accent-color, #6f5cff);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.order-history-heading h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+}
+
+.order-history-heading > p:last-of-type {
+  margin: 0.65rem 0 0;
+  color: var(--text-muted, #8481ae);
+}
+
+.order-history-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.order-history-card,
+.order-history-empty,
+.order-details-card {
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: var(--radius-lg, 30px);
+  background: rgba(246, 244, 255, 0.82);
+  box-shadow: var(--clay-card);
+}
+
+.order-history-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.4rem 1.6rem;
+}
+
+.order-history-card-main {
+  min-width: 0;
+}
+
+.order-history-card-title,
+.order-details-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.order-history-card-title > svg,
+.order-details-section-title > svg {
+  flex: 0 0 auto;
+  color: var(--accent-color, #6f5cff);
+}
+
+.order-history-card-title > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.order-history-card-title span {
+  color: var(--text-muted, #8481ae);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.order-history-card-title strong {
+  overflow-wrap: anywhere;
+}
+
+.order-history-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2.5rem;
+  margin: 1rem 0 0;
+}
+
+.order-history-fields > div,
+.order-details-facts > div {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.order-history-fields dt,
+.order-details-facts dt {
+  color: var(--text-muted, #8481ae);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.order-history-fields dd,
+.order-details-facts dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.order-status-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.38rem 0.7rem;
+  border-radius: 999px;
+  color: #4a3cc4;
+  background: rgba(111, 92, 255, 0.12);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.order-history-details-link,
+.order-history-back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  color: var(--accent-color, #6f5cff);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.order-history-details-link {
+  flex: 0 0 auto;
+  padding: 0.75rem 0.9rem;
+  border-radius: 13px;
+  background: rgba(111, 92, 255, 0.09);
+}
+
+.order-history-details-link:hover,
+.order-history-back-link:hover {
+  color: var(--accent-hover, #5b48f0);
+}
+
+.order-history-empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.order-history-empty > svg {
+  color: var(--accent-color, #6f5cff);
+}
+
+.order-history-empty h2,
+.order-history-empty p {
+  margin: 0;
+}
+
+.order-history-empty p,
+.order-details-muted {
+  color: var(--text-muted, #8481ae);
+}
+
+.order-history-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  margin-top: 0.6rem;
+  padding: 0.65rem 1.1rem;
+  border-radius: 14px;
+  color: white;
+  background: var(--accent-color, #6f5cff);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.order-history-message {
+  padding: 1rem 1.2rem;
+  border-radius: 16px;
+  color: #a42c43;
+  background: rgba(255, 235, 239, 0.8);
+}
+
+.order-details-page {
+  max-width: 1120px;
+}
+
+.order-history-back-link {
+  margin-bottom: 1.5rem;
+}
+
+.order-details-heading {
+  margin-bottom: 1.5rem;
+}
+
+.order-details-heading .order-status-badge {
+  margin-top: 0.8rem;
+}
+
+.order-details-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  align-items: start;
+  gap: 1.25rem;
+}
+
+.order-details-main {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.order-details-card {
+  padding: 1.5rem;
+}
+
+.order-details-section-title {
+  margin-bottom: 1.2rem;
+}
+
+.order-details-section-title h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.order-detail-items {
+  display: grid;
+}
+
+.order-detail-item {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(132, 129, 174, 0.2);
+}
+
+.order-detail-item:first-child {
+  padding-top: 0;
+}
+
+.order-detail-item img,
+.order-detail-item-placeholder {
+  width: 64px;
+  height: 64px;
+  border-radius: 15px;
+  object-fit: cover;
+  background: rgba(111, 92, 255, 0.08);
+}
+
+.order-detail-item-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--text-muted, #8481ae);
+}
+
+.order-detail-item-info {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.order-detail-item-info strong {
+  overflow-wrap: anywhere;
+}
+
+.order-detail-item-info span {
+  color: var(--text-muted, #8481ae);
+  font-size: 0.85rem;
+}
+
+.order-detail-line-total {
+  white-space: nowrap;
+}
+
+.order-details-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.2rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.order-details-address {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--text-muted, #8481ae);
+  font-style: normal;
+}
+
+.order-details-address strong {
+  color: var(--primary-color, #2f2b63);
+}
+
+.order-details-facts {
+  display: grid;
+  gap: 1.1rem;
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .order-details-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .order-history-page {
+    padding: 2.5rem 1rem 3.5rem;
+  }
+
+  .order-history-card {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 1.2rem;
+  }
+
+  .order-history-fields {
+    gap: 1rem 1.5rem;
+  }
+
+  .order-detail-item {
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+
+  .order-detail-item img,
+  .order-detail-item-placeholder {
+    width: 54px;
+    height: 54px;
+  }
+
+  .order-detail-line-total {
+    grid-column: 2;
+  }
+
+  .order-details-card {
+    padding: 1.2rem;
+  }
+}
