@@ -24,8 +24,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.mount("/static", StaticFiles(directory=PACKAGE_DIR / "static"), name="static")
-app.mount("/media", StaticFiles(directory=PACKAGE_DIR / "media"), name="media")
+
+
 
 app.add_middleware(
     CORSMiddleware,
