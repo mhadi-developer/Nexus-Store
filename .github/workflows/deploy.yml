@@ -103,10 +103,11 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           version: "0.12.23"
+          enable-cache: true  # Speeds up subsequent workflow runs by caching dependencies
 
       - name: Install dependencies
         working-directory: backend
-        run: uv sync --frozen --no-dev
+        run: uv sync --frozen --no-dev --no-install-project  # --no-install-project fixes the missing module error
 
       # Uncomment once you have real tests:
       # - name: Run tests
