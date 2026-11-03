@@ -29,7 +29,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5174", "https://nexus-store-client.netlify.app"],
+    allow_origins=["http://localhost:5173", "http://localhost:5174", "https://nexus-store-client.netlify.app","https://nexus-store-admin.netlify.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

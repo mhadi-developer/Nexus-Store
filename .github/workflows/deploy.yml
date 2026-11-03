@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       frontend: ${{ steps.filter.outputs.frontend }}
+      admin: ${{ steps.filter.outputs.admin }}
       backend: ${{ steps.filter.outputs.backend }}
 
     steps:
@@ -30,6 +31,8 @@ jobs:
           filters: |
             frontend:
               - "frontend/**"
+            admin:
+              - "admin/**"
             backend:
               - "backend/**"
 
@@ -82,7 +85,54 @@ jobs:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 
   # ──────────────────────────────────────────────────────────────
-  # JOB 2: Deploy Backend → Render
+  # JOB 2: Deploy Admin → Netlify
+  # ──────────────────────────────────────────────────────────────
+  deploy-admin:
+    name: 🚀 Admin → Netlify
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.admin == 'true' || github.event_name == 'workflow_dispatch'
+
+    defaults:
+      run:
+        working-directory: admin
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: admin/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          # Uses the same API endpoint as the customer-facing frontend.
+          VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3
+        with:
+          publish-dir: admin/dist
+          production-branch: main
+          production-deploy: true
+          deploy-message: "Deploy admin ${{ github.sha }}"
+          enable-pull-request-comment: false
+          enable-commit-comment: false
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          # Secret: ADMIN_NETLIFY_SITE_ID → Admin Netlify site → Site settings → General → Site ID
+          NETLIFY_SITE_ID: ${{ secrets.ADMIN_NETLIFY_SITE_ID }}
+
+  # ──────────────────────────────────────────────────────────────
+  # JOB 3: Deploy Backend → Render
   # ──────────────────────────────────────────────────────────────
   deploy-backend:
     name: 🚀 Backend → Render
